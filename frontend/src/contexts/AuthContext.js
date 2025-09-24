@@ -59,17 +59,17 @@ export const AuthProvider = ({ children }) => {
       });
 
       const { access_token, user_type, user_id } = response.data;
-
+      
       setToken(access_token);
       localStorage.setItem('token', access_token);
-
+      
       // Load user profile after login
       const profileResponse = await axios.get('/user/profile', {
         headers: { Authorization: `Bearer ${access_token}` }
       });
-
+      
       setUser(profileResponse.data);
-
+      
       return { success: true };
     } catch (error) {
       console.error('Login failed:', error);
@@ -83,19 +83,19 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await axios.post('/auth/register', userData);
-
+      
       const { access_token, user_type, user_id } = response.data;
-
+      
       setToken(access_token);
       localStorage.setItem('token', access_token);
-
+      
       // Load user profile after registration
       const profileResponse = await axios.get('/user/profile', {
         headers: { Authorization: `Bearer ${access_token}` }
       });
-
+      
       setUser(profileResponse.data);
-
+      
       return { success: true };
     } catch (error) {
       console.error('Registration failed:', error);
@@ -116,11 +116,11 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     try {
       await axios.put('/user/profile', profileData);
-
+      
       // Reload user profile
       const response = await axios.get('/user/profile');
       setUser(response.data);
-
+      
       return { success: true };
     } catch (error) {
       console.error('Profile update failed:', error);
@@ -135,17 +135,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-
+      
       const response = await axios.post('/user/upload-image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-
+      
       // Reload user profile to get updated image
       const profileResponse = await axios.get('/user/profile');
       setUser(profileResponse.data);
-
+      
       return { success: true, imageUrl: response.data.image_url };
     } catch (error) {
       console.error('Image upload failed:', error);

@@ -34,7 +34,7 @@ const WelcomePage = () => {
             </span>
           </h2>
           <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-            Revolucione seus pagamentos com PSPAY e USDT. Seja cliente ou comerciante,
+            Revolucione seus pagamentos com PSPAY e USDT. Seja cliente ou comerciante, 
             oferecemos a melhor experiência em transações digitais seguras e rápidas.
           </p>
         </div>
@@ -42,10 +42,9 @@ const WelcomePage = () => {
         {/* User Type Selection */}
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
           {/* Client Card */}
-          <Link
+          <Link 
             to="/register/client"
             className="group relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 hover:scale-105"
-            data-testid="client-register-link"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 to-blue-700/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative">
@@ -54,7 +53,7 @@ const WelcomePage = () => {
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Sou Cliente</h3>
               <p className="text-slate-600 mb-6">
-                Faça pagamentos rápidos e seguros com criptomoedas.
+                Faça pagamentos rápidos e seguros com criptomoedas. 
                 Gerencie sua carteira digital e encontre lojas parceiras.
               </p>
               <ul className="space-y-2 text-sm text-slate-600">
@@ -82,10 +81,9 @@ const WelcomePage = () => {
           </Link>
 
           {/* Merchant Card */}
-          <Link
+          <Link 
             to="/register/merchant"
             className="group relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 hover:scale-105"
-            data-testid="merchant-register-link"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-orange-600/5 to-orange-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative">
@@ -94,7 +92,7 @@ const WelcomePage = () => {
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Sou Comerciante</h3>
               <p className="text-slate-600 mb-6">
-                Aceite pagamentos em criptomoedas, gerencie seus produtos
+                Aceite pagamentos em criptomoedas, gerencie seus produtos 
                 e acompanhe suas vendas com relatórios detalhados.
               </p>
               <ul className="space-y-2 text-sm text-slate-600">
@@ -164,10 +162,9 @@ const WelcomePage = () => {
           <p className="text-blue-100 mb-8 text-lg">
             Faça login e continue aproveitando os benefícios do PayCoin
           </p>
-          <Link
+          <Link 
             to="/login"
             className="inline-block bg-white text-blue-900 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-            data-testid="login-link"
           >
             Fazer Login
           </Link>

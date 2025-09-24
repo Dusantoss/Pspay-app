@@ -54,37 +54,37 @@ function AppContent() {
           <Route path="/welcome" element={!user ? <WelcomePage /> : <Navigate to="/" replace />} />
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" replace />} />
           <Route path="/register/:type" element={!user ? <RegisterPage /> : <Navigate to="/" replace />} />
-
+          
           {/* Protected Routes */}
           <Route path="/profile" element={
             <ProtectedRoute>
               <ProfilePage />
             </ProtectedRoute>
           } />
-
+          
           <Route path="/settings" element={
             <ProtectedRoute>
               <SettingsPage />
             </ProtectedRoute>
           } />
-
+          
           {/* Dashboard Routes */}
           <Route path="/" element={
             user ? (
-              user.user_type === 'client' ?
+              user.user_type === 'client' ? 
                 <Navigate to="/client-dashboard" replace /> :
                 <Navigate to="/merchant-dashboard" replace />
             ) : (
               <Navigate to="/welcome" replace />
             )
           } />
-
+          
           <Route path="/client-dashboard" element={
             <ProtectedRoute requiredUserType="client">
               <ClientDashboard />
             </ProtectedRoute>
           } />
-
+          
           <Route path="/merchant-dashboard" element={
             <ProtectedRoute requiredUserType="merchant">
               <MerchantDashboard />
