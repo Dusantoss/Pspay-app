@@ -9,7 +9,7 @@ const Web3Context = createContext();
 const TOKENS = {
   PSPAY: {
     name: "PSPAY",
-    address: "0x275fE1709Dc07112BcAf56A3465ECE683c5Fb04c",
+    address: "0x275fE1709Dc07112BcAf56A3465ECE683c5Fb04c", // Será convertido com checksum
     symbol: "PSPAY",
     decimals: 18,
     logo: "https://www.pspay.solutions/img/logoP.png",
