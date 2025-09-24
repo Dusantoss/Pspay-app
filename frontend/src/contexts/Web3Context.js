@@ -365,8 +365,12 @@ export const Web3Provider = ({ children }) => {
         throw new Error('Unsupported token');
       }
 
+      // Converter endereços para checksum correto
+      const checksumTokenAddress = ethers.getAddress(tokenConfig.address);
+      const checksumToAddress = ethers.getAddress(toAddress);
+      
       const contract = new ethers.Contract(
-        tokenConfig.address,
+        checksumTokenAddress,
         tokenConfig.abi,
         signer
       );
