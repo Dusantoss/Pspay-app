@@ -292,32 +292,63 @@ export const Web3Provider = ({ children }) => {
   };
 
   const updateBalances = async () => {
-    if (!account || !provider) return;
+    if (!account || !provider) {
+      console.log('❌ updateBalances: account ou provider não disponível');
+      return;
+    }
 
+    console.log('💰 Atualizando saldos para conta:', account);
+    
     try {
       const newBalances = {};
       
       for (const [tokenKey, tokenConfig] of Object.entries(TOKENS)) {
-        const contract = new ethers.Contract(
-          tokenConfig.address,
-          tokenConfig.abi,
-          provider
-        );
-        
-        const balance = await contract.balanceOf(account);
-        const decimals = await contract.decimals();
-        const formattedBalance = ethers.formatUnits(balance, decimals);
-        
-        newBalances[tokenKey] = {
-          raw: balance.toString(),
-          formatted: formattedBalance,
-          symbol: tokenConfig.symbol
-        };
+        try {
+          console.log(`🔍 Buscando saldo de ${tokenKey}...`);
+          
+          // Converter endereço para checksum correto
+          const checksumAddress = ethers.getAddress(tokenConfig.address);
+          console.log(`📝 Endereço ${tokenKey} (checksum):`, checksumAddress);
+          
+          const contract = new ethers.Contract(
+            checksumAddress,
+            tokenConfig.abi,
+            provider
+          );
+          
+          const [balance, decimals] = await Promise.all([
+            contract.balanceOf(account),
+            contract.decimals()
+          ]);
+          
+          const formattedBalance = ethers.formatUnits(balance, decimals);
+          
+          newBalances[tokenKey] = {
+            raw: balance.toString(),
+            formatted: formattedBalance,
+            symbol: tokenConfig.symbol,
+            displayFormatted: parseFloat(formattedBalance).toFixed(4)
+          };
+          
+          console.log(`✅ Saldo ${tokenKey}:`, formattedBalance);
+          
+        } catch (tokenError) {
+          console.error(`❌ Erro ao buscar saldo de ${tokenKey}:`, tokenError);
+          newBalances[tokenKey] = {
+            raw: '0',
+            formatted: '0',
+            symbol: tokenConfig.symbol,
+            displayFormatted: '0.0000',
+            error: tokenError.message
+          };
+        }
       }
       
       setBalances(newBalances);
+      console.log('✅ Saldos atualizados:', newBalances);
+      
     } catch (error) {
-      console.error('Error updating balances:', error);
+      console.error('❌ Erro geral ao atualizar saldos:', error);
     }
   };
 
