@@ -378,7 +378,7 @@ export const Web3Provider = ({ children }) => {
       const decimals = await contract.decimals();
       const amountInWei = ethers.parseUnits(amount.toString(), decimals);
       
-      const tx = await contract.transfer(toAddress, amountInWei);
+      const tx = await contract.transfer(checksumToAddress, amountInWei);
       
       return {
         hash: tx.hash,
