@@ -115,9 +115,9 @@ export const Web3Provider = ({ children }) => {
         metadata: {
           name: 'Pspay',
           description: 'Plataforma de Pagamentos com PSPAY e USDT',
-          url: 'https://crypto-payments-10.preview.emergentagent.com',
+          url: window.location.origin,
           icons: ['https://www.pspay.solutions/img/logoP.png'],
-          verifyUrl: 'https://crypto-payments-10.preview.emergentagent.com'
+          verifyUrl: window.location.origin
         },
         showQrModal: true,
         optionalChains: [56],
