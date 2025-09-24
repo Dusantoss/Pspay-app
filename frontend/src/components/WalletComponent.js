@@ -11,6 +11,7 @@ const WalletComponent = () => {
     setSelectedToken,
     tokens,
     connectWallet,
+    disconnectWallet,
     updateBalances,
     isConnecting,
     networkError
@@ -67,7 +68,7 @@ const WalletComponent = () => {
           ) : (
             'Conectar Carteira'
           )}
-        </button>
+       </button>) : (<button onClick={disconnectWallet} className="ml-3 bg-red-600 text-white px-3 py-2 rounded-md hover:opacity-90">Desconectar</button>)}
       </div>
     );
   }
