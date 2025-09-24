@@ -337,6 +337,23 @@ export const Web3Provider = ({ children }) => {
       return;
     }
 
+    // Verificar se estamos na BSC antes de buscar saldos
+    try {
+      const network = await provider.getNetwork();
+      console.log('🌐 Rede atual:', network.chainId);
+      
+      if (Number(network.chainId) !== 56) {
+        console.log('⚠️ Não está na BSC. Pulando busca de saldos.');
+        setNetworkError('Por favor, conecte-se à Binance Smart Chain (BSC) para ver os saldos');
+        return;
+      }
+      
+      setNetworkError(null);
+    } catch (networkError) {
+      console.error('❌ Erro ao verificar rede:', networkError);
+      return;
+    }
+
     console.log('💰 Atualizando saldos para conta:', account);
     
     try {
