@@ -116,11 +116,15 @@ export const Web3Provider = ({ children }) => {
           name: 'Pspay',
           description: 'Plataforma de Pagamentos com PSPAY e USDT',
           url: 'https://crypto-payments-10.preview.emergentagent.com',
-          icons: ['https://www.pspay.solutions/img/logoP.png']
+          icons: ['https://www.pspay.solutions/img/logoP.png'],
+          verifyUrl: 'https://crypto-payments-10.preview.emergentagent.com'
         },
         showQrModal: true,
         optionalChains: [56],
-        disableProviderPing: false
+        disableProviderPing: false,
+        qrModalOptions: {
+          themeMode: 'light'
+        }
       });
 
       console.log('✅ WalletConnect inicializado com sucesso');
