@@ -197,9 +197,49 @@ export const Web3Provider = ({ children }) => {
     }
   };
 
-  const handleChainChanged = (chainId) => {
-    // Reload the page when chain changes
-    window.location.reload();
+  const handleChainChanged = async (chainId) => {
+    console.log('🌐 Chain changed to:', chainId);
+    
+    // Converter para decimal se necessário
+    const numericChainId = typeof chainId === 'string' ? parseInt(chainId, 16) : chainId;
+    
+    if (numericChainId !== 56) {
+      console.log('⚠️ Rede incorreta. Mudando para BSC...');
+      setNetworkError('Por favor, conecte-se à Binance Smart Chain (BSC)');
+      
+      // Tentar mudar para BSC automaticamente
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x38' }], // BSC
+          });
+          setNetworkError(null);
+        } catch (switchError) {
+          console.error('Erro ao mudar para BSC:', switchError);
+          if (switchError.code === 4902) {
+            // Tentar adicionar BSC se não existir
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [BSC_NETWORK],
+              });
+              setNetworkError(null);
+            } catch (addError) {
+              console.error('Erro ao adicionar BSC:', addError);
+            }
+          }
+        }
+      }
+    } else {
+      console.log('✅ Conectado à BSC (Chain 56)');
+      setNetworkError(null);
+      
+      // Atualizar saldos quando voltar para BSC
+      if (account && provider) {
+        updateBalances();
+      }
+    }
   };
 
   const connectWallet = async (useWalletConnect = false) => {
