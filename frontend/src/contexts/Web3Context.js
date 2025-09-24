@@ -104,17 +104,18 @@ export const Web3Provider = ({ children }) => {
       // Configurar WalletConnect 2.0
       // IMPORTANTE: Para produção, obtenha um Project ID real em https://dashboard.reown.com
       const wcProvider = await EthereumProvider.init({
-        projectId: process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || 'a01e2b3c4d5e6f7a8b9c0d1e2f3a4b5c', // Project ID para desenvolvimento
+        projectId: '33c5ba1dfbf9e1be8d7d5ea32ffc13d3', // SEU PROJECT ID REAL
         chains: [56], // Binance Smart Chain
         rpcMap: {
           56: 'https://bsc-dataseed.binance.org/'
         },
         metadata: {
-          name: 'PayCoin',
-          description: 'Plataforma de Pagamentos com Criptomoedas',
-          url: window.location.origin,
-          icons: ['https://walletconnect.com/walletconnect-logo.png']
-        }
+          name: 'Pspay - Plataforma de Pagamentos Crypto',
+          description: 'Plataforma de Pagamentos com PSPAY e USDT na Binance Smart Chain',
+          url: 'https://cryptopay-7.preview.emergentagent.com',
+          icons: ['https://www.pspay.solutions/img/logoP.png']
+        },
+        showQrModal: true
       });
 
       setWalletConnectProvider(wcProvider);
