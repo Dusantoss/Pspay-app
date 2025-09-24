@@ -101,10 +101,13 @@ export const Web3Provider = ({ children }) => {
 
   const initializeWalletConnect = async () => {
     try {
-      // Configurar WalletConnect 2.0
-      // IMPORTANTE: Para produção, obtenha um Project ID real em https://dashboard.reown.com
+      console.log('🔄 Inicializando WalletConnect 2.0...');
+      
+      const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || '33c5ba1dfbf9e1be8d7d5ea32ffc13d3';
+      console.log('📋 Project ID:', projectId);
+      
       const wcProvider = await EthereumProvider.init({
-        projectId: process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || '33c5ba1dfbf9e1be8d7d5ea32ffc13d3',
+        projectId: projectId,
         chains: [56], // Binance Smart Chain
         rpcMap: {
           56: 'https://bsc-dataseed.binance.org/'
@@ -116,23 +119,47 @@ export const Web3Provider = ({ children }) => {
           icons: ['https://www.pspay.solutions/img/logoP.png']
         },
         showQrModal: true,
-        optionalChains: [56]
+        optionalChains: [56],
+        disableProviderPing: false
       });
 
+      console.log('✅ WalletConnect inicializado com sucesso');
       setWalletConnectProvider(wcProvider);
 
       // Listeners para WalletConnect
-      wcProvider.on('accountsChanged', handleAccountsChanged);
-      wcProvider.on('chainChanged', handleChainChanged);
+      wcProvider.on('accountsChanged', (accounts) => {
+        console.log('👥 Contas alteradas:', accounts);
+        handleAccountsChanged(accounts);
+      });
+      
+      wcProvider.on('chainChanged', (chainId) => {
+        console.log('🌐 Rede alterada:', chainId);
+        handleChainChanged(chainId);
+      });
+      
       wcProvider.on('disconnect', () => {
+        console.log('🔌 WalletConnect desconectado');
         setAccount(null);
         setProvider(null);
         setWeb3(null);
         setBalances({});
       });
 
+      // Verificar se já existe uma sessão ativa
+      if (wcProvider.connected && wcProvider.accounts?.length > 0) {
+        console.log('🔗 Sessão WalletConnect existente encontrada');
+        setAccount(wcProvider.accounts[0]);
+        
+        // Configurar providers
+        const ethProvider = new ethers.BrowserProvider(wcProvider);
+        const web3Instance = new Web3(wcProvider);
+        setProvider(ethProvider);
+        setWeb3(web3Instance);
+      }
+
     } catch (error) {
-      console.error('Erro ao inicializar WalletConnect:', error);
+      console.error('❌ Erro ao inicializar WalletConnect:', error);
+      setNetworkError('Falha na inicialização do WalletConnect. Recarregue a página.');
     }
   };
 
