@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { useWeb3 } from '../contexts/Web3Context';
 import { Wallet, Coins, TrendingUp, RefreshCw, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';

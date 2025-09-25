@@ -14,22 +14,198 @@ const TOKENS = {
     decimals: 18,
     logo: "https://www.pspay.solutions/img/logoP.png",
     abi: [
-      { "inputs": [{ "internalType": "address", "name": "_marketingWallet", "type": "address" }, { "internalType": "address", "name": "_lpWallet", "type": "address" }], "stateMutability": "nonpayable", "type": "constructor" },
-      { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Approval", "type": "event" },
-      { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Transfer", "type": "event" },
-      { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" }], "name": "allowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-      { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" },
-      { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-      { "inputs": [], "name": "decimals", "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }], "stateMutability": "pure", "type": "function" },
-      { "inputs": [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "pure", "type": "function" },
-      { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "pure", "type": "function" },
-      { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-      { "inputs": [{ "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transfer", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" },
-      { "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }
-    ]
+      {
+        "inputs": [{ "internalType": "address", "name": "_marketingWallet", "type": "address" },
+        { "internalType": "address", "name": "_lpWallet", "type": "address" }
+        ], "stateMutability": "nonpayable", "type": "constructor"
+      }, {
+        "anonymous": false, "inputs":
+          [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" },
+          { "indexed": true, "internalType": "address", "name": "spender", "type": "address" },
+          { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }
+          ], "name": "Approval", "type": "event"
+      }, {
+        "anonymous": false, "inputs": [{
+          "indexed":
+            false, "internalType": "uint256", "name": "tokenAmount", "type": "uint256"
+        },
+        { "indexed": false, "internalType": "uint256", "name": "bnbAmount", "type": "uint256" }
+        ], "name": "LiquidityAdded", "type": "event"
+      }, {
+        "anonymous": false, "inputs": [
+          { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+          { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+        ], "name": "OwnershipTransferred", "type": "event"
+      }, {
+        "anonymous": false, "inputs": [
+          { "indexed": false, "internalType": "bool", "name": "enabled", "type": "bool" }]
+        , "name": "SwapAndLiquifyEnabledUpdated", "type": "event"
+      }, {
+        "anonymous": false, "inputs":
+          [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" },
+          { "indexed": true, "internalType": "address", "name": "to", "type": "address" },
+          { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }
+          ], "name": "Transfer", "type": "event"
+      }, {
+        "inputs": [], "name": "PancakeSwapV2Router", "outputs": [
+          { "internalType": "contract IUniswapV2Router02", "name": "", "type": "address" }]
+        , "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [], "name": "Trading",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability"
+          : "view", "type": "function"
+      }, {
+        "inputs": [{
+          "internalType": "bool", "name": "_enable"
+          , "type": "bool"
+        }], "name": "TrandingOn", "outputs": [], "stateMutability": "nonpayable"
+        , "type": "function"
+      }, {
+        "inputs": [], "name": "USDT", "outputs": [
+          { "internalType": "address", "name": "", "type": "address" }]
+        , "stateMutability": "view", "type": "function"
+      }, {
+        "inputs":
+          [], "name": "_maxRxAmount", "outputs": [{
+            "internalType":
+              "uint256", "name": "", "type": "uint256"
+          }], "stateMutability"
+          : "view", "type": "function"
+      }, {
+        "inputs": [], "name": "_maxTxAmount"
+        , "outputs": [{
+          "internalType": "uint256", "name": "", "type":
+            "uint256"
+        }], "stateMutability": "view", "type": "function"
+      }
+      , {
+        "inputs": [], "name": "_maxWallet", "outputs": [{
+          "internalType":
+            "uint256", "name": "", "type": "uint256"
+        }], "stateMutability": "view"
+        , "type": "function"
+      }, {
+        "inputs": [{
+          "internalType": "address", "name":
+            "owner", "type": "address"
+        }, {
+          "internalType": "address", "name": "spender"
+          , "type": "address"
+        }], "name": "allowance", "outputs": [{
+          "internalType":
+            "uint256", "name": "", "type": "uint256"
+        }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [{
+          "internalType": "address", "name": "spender", "type":
+            "address"
+        }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable", "type": "function"
+      }, {
+        "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs"
+          : [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [{
+          "internalType": "address", "name": "account",
+          "type": "address"
+        }], "name": "blackList", "outputs": [], "stateMutability": "nonpayable", "type": "function"
+      }, {
+        "inputs": [], "name": "buyPerSecond", "outputs": [{
+          "internalType":
+            "uint256", "name": "", "type": "uint256"
+        }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [], "name": "buyRates", "outputs": [{
+          "internalType": "uint256", "name": "rfi",
+          "type": "uint256"
+        }, { "internalType": "uint256", "name": "marketing", "type": "uint256" }, { "internalType": "uint256", "name": "liquidity", "type": "uint256" }, {
+          "internalType": "uint256"
+          , "name": "burn", "type": "uint256"
+        }], "stateMutability": "view", "type": "function"
+      }
+      , {
+        "inputs": [], "name": "contractBalance", "outputs": [{ "internalType": "uint256", "name": "marketing_balance", "type": "uint256" }, {
+          "internalType": "uint256",
+          "name": "lp_balance", "type": "uint256"
+        }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [], "name": "decimals", "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }], "stateMutability":
+          "pure", "type": "function"
+      }, {
+        "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "subtractedValue", "type": "uint256" }], "name": "decreaseAllowance", "outputs": [{
+          "internalType":
+            "bool", "name": "", "type": "bool"
+        }], "stateMutability": "nonpayable", "type": "function"
+      }, {
+        "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name":
+          "excludeFromAll", "outputs": [], "stateMutability": "nonpayable", "type": "function"
+      }, {
+        "inputs": [{
+          "internalType": "address", "name": "account"
+          , "type": "address"
+        }], "name": "excludeFromFee", "outputs": [], "stateMutability": "nonpayable", "type": "function"
+      }, {
+        "inputs": [{ "internalType": "address", "name": "wallet", "type": "address" }], "name": "getFromLastPurchaseBuy", "outputs": [
+          { "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [{ "internalType": "address", "name": "walletSell", "type": "address" }], "name": "getFromLastSell", "outputs": [{
+          "internalType": "uint256", "name"
+            : "", "type": "uint256"
+        }], "stateMutability": "view", "type": "function"
+      }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "includeInFee", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, {
+        "inputs": [{
+          "internalType":
+            "address", "name": "spender", "type": "address"
+        }, { "internalType": "uint256", "name": "addedValue", "type": "uint256" }], "name": "increaseAllowance", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function"
+      }, {
+        "inputs"
+          : [{ "internalType": "address", "name": "account", "type": "address" }], "name": "isExcludedFromFee", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [{
+          "internalType": "uint256", "name": "lastBuyOrSellTime"
+          , "type": "uint256"
+        }, { "internalType": "uint256", "name": "lockTime", "type": "uint256" }], "name": "lockToBuyOrSellForTime", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [], "name": "lpWallet", "outputs":
+          [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function"
+      }, { "inputs": [], "name": "marketingWallet", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, {
+        "inputs"
+          : [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "pure", "type": "function"
+      }, {
+        "inputs": [], "name": "numTokensToSwap", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type"
+          : "function"
+      }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "pancakeswapV2Pair", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, {
+        "inputs": [{
+          "internalType": "uint256"
+          , "name": "tAmount", "type": "uint256"
+        }, { "internalType": "bool", "name": "deductTransferRfi", "type": "bool" }], "name": "reflectionFromToken", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function"
+      }, {
+        "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "removeFromBlacklist", "outputs": []
+        , "stateMutability": "nonpayable", "type": "function"
+      }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "sellPerSecond", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, {
+        "inputs": [], "name": "sellRates", "outputs": [{
+          "internalType":
+            "uint256", "name": "rfi", "type": "uint256"
+        }, { "internalType": "uint256", "name": "marketing", "type": "uint256" }, { "internalType": "uint256", "name": "liquidity", "type": "uint256" }, { "internalType": "uint256", "name": "burn", "type": "uint256" }], "stateMutability": "view", "type": "function"
+      }, { "inputs": [{ "internalType": "uint256", "name": "timeBetweenPurchases", "type": "uint256" }], "name": "setBuyPerSecond", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "rfi", "type": "uint256" }, { "internalType": "uint256", "name": "marketing", "type": "uint256" }, { "internalType": "uint256", "name": "liquidity", "type": "uint256" }, { "internalType": "uint256", "name": "burn", "type": "uint256" }], "name": "setBuyRates", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, {
+        "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "setLpWallet", "outputs": [], "stateMutability":
+          "nonpayable", "type": "function"
+      }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "setMarketingWallet", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "maxRxPercent", "type": "uint256" }], "name": "setMaxRxPercent", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "maxTxPercent", "type": "uint256" }], "name": "setMaxTxPercent", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "maxWalletPercent", "type": "uint256" }], "name": "setMaxWallet", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "timeBetweenPurchasesSell", "type": "uint256" }], "name": "setSellPerSecond", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, {
+        "inputs": [{
+          "internalType":
+            "uint256", "name": "rfi", "type": "uint256"
+        }, { "internalType": "uint256", "name": "marketing", "type": "uint256" }, { "internalType": "uint256", "name": "liquidity", "type": "uint256" }, { "internalType": "uint256", "name": "burn", "type": "uint256" }], "name": "setSellRates", "outputs": [], "stateMutability": "nonpayable", "type": "function"
+      }, { "inputs": [{ "internalType": "bool", "name": "_enabled", "type": "bool" }], "name": "setSwapAndLiquifyEnabled", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+      { "inputs": [{ "internalType": "uint256", "name": "top", "type": "uint256" }], "name": "setTokenToSwap", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "setUsdtAddress", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bool", "name": "_enable", "type": "bool" }], "name": "settransform", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, {
+        "inputs": [], "name": "swapAndLiquifyEnabled", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability":
+          "view", "type": "function"
+      }, { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "pure", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "rAmount", "type": "uint256" }], "name": "tokenFromReflection", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, {
+        "inputs": [], "name": "totFeesPaid", "outputs": [{ "internalType": "uint256", "name": "rfi", "type": "uint256" }, { "internalType": "uint256", "name": "marketing", "type": "uint256" }, { "internalType": "uint256", "name": "liquidity", "type": "uint256" },
+        { "internalType": "uint256", "name": "burn", "type": "uint256" }], "stateMutability": "view", "type": "function"
+      }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transfer", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "address", "name": "recipient", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "", "type": "address" }], "name": "walletToPurchaseTime", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "", "type": "address" }], "name": "walletToSellime", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "withdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "stateMutability": "payable", "type": "receive" }]
   },
   USDT: {
-    name: "USDT", 
+    name: "USDT",
     address: "0x55d398326f99059fF775485246999027B3197955",
     symbol: "USDT",
     decimals: 18,
@@ -84,7 +260,7 @@ export const Web3Provider = ({ children }) => {
   useEffect(() => {
     initializeWalletConnect();
     checkWalletConnection();
-    
+
     // Listen for account changes
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', handleAccountsChanged);
@@ -102,10 +278,10 @@ export const Web3Provider = ({ children }) => {
   const initializeWalletConnect = async () => {
     try {
       console.log('🔄 Inicializando WalletConnect 2.0...');
-      
+
       const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || '33c5ba1dfbf9e1be8d7d5ea32ffc13d3';
       console.log('📋 Project ID:', projectId);
-      
+
       const wcProvider = await EthereumProvider.init({
         projectId: projectId,
         chains: [56], // Binance Smart Chain
@@ -135,12 +311,12 @@ export const Web3Provider = ({ children }) => {
         console.log('👥 Contas alteradas:', accounts);
         handleAccountsChanged(accounts);
       });
-      
+
       wcProvider.on('chainChanged', (chainId) => {
         console.log('🌐 Rede alterada:', chainId);
         handleChainChanged(chainId);
       });
-      
+
       wcProvider.on('disconnect', () => {
         console.log('🔌 WalletConnect desconectado');
         setAccount(null);
@@ -153,7 +329,7 @@ export const Web3Provider = ({ children }) => {
       if (wcProvider.connected && wcProvider.accounts?.length > 0) {
         console.log('🔗 Sessão WalletConnect existente encontrada');
         setAccount(wcProvider.accounts[0]);
-        
+
         // Configurar providers
         const ethProvider = new ethers.BrowserProvider(wcProvider);
         const web3Instance = new Web3(wcProvider);
@@ -199,14 +375,14 @@ export const Web3Provider = ({ children }) => {
 
   const handleChainChanged = async (chainId) => {
     console.log('🌐 Chain changed to:', chainId);
-    
+
     // Converter para decimal se necessário
     const numericChainId = typeof chainId === 'string' ? parseInt(chainId, 16) : chainId;
-    
+
     if (numericChainId !== 56) {
       console.log('⚠️ Rede incorreta. Mudando para BSC...');
       setNetworkError('Por favor, conecte-se à Binance Smart Chain (BSC)');
-      
+
       // Tentar mudar para BSC automaticamente
       if (window.ethereum) {
         try {
@@ -234,7 +410,7 @@ export const Web3Provider = ({ children }) => {
     } else {
       console.log('✅ Conectado à BSC (Chain 56)');
       setNetworkError(null);
-      
+
       // Atualizar saldos quando voltar para BSC
       if (account && provider) {
         updateBalances();
@@ -269,10 +445,10 @@ export const Web3Provider = ({ children }) => {
       // Create provider and web3 instance
       const ethProvider = new ethers.BrowserProvider(walletProvider);
       const web3Instance = new Web3(walletProvider);
-      
+
       setProvider(ethProvider);
       setWeb3(web3Instance);
-      
+
       // Get current account
       const signer = await ethProvider.getSigner();
       const address = await signer.getAddress();
@@ -281,7 +457,7 @@ export const Web3Provider = ({ children }) => {
       // Check if we're on BSC
       const network = await ethProvider.getNetwork();
       console.log('Connected to network:', network.chainId);
-      
+
       if (Number(network.chainId) !== 56) {
         console.log('Wrong network, switching to BSC...');
         if (!useWalletConnect) {
@@ -341,13 +517,13 @@ export const Web3Provider = ({ children }) => {
     try {
       const network = await provider.getNetwork();
       console.log('🌐 Rede atual:', network.chainId);
-      
+
       if (Number(network.chainId) !== 56) {
         console.log('⚠️ Não está na BSC. Pulando busca de saldos.');
         setNetworkError('Por favor, conecte-se à Binance Smart Chain (BSC) para ver os saldos');
         return;
       }
-      
+
       setNetworkError(null);
     } catch (networkError) {
       console.error('❌ Erro ao verificar rede:', networkError);
@@ -355,40 +531,40 @@ export const Web3Provider = ({ children }) => {
     }
 
     console.log('💰 Atualizando saldos para conta:', account);
-    
+
     try {
       const newBalances = {};
-      
+
       for (const [tokenKey, tokenConfig] of Object.entries(TOKENS)) {
         try {
           console.log(`🔍 Buscando saldo de ${tokenKey}...`);
-          
+
           // Converter endereço para checksum correto
           const checksumAddress = ethers.getAddress(tokenConfig.address);
           console.log(`📝 Endereço ${tokenKey} (checksum):`, checksumAddress);
-          
+
           const contract = new ethers.Contract(
             checksumAddress,
             tokenConfig.abi,
             provider
           );
-          
+
           const [balance, decimals] = await Promise.all([
             contract.balanceOf(account),
             contract.decimals()
           ]);
-          
+
           const formattedBalance = ethers.formatUnits(balance, decimals);
-          
+
           newBalances[tokenKey] = {
             raw: balance.toString(),
             formatted: formattedBalance,
             symbol: tokenConfig.symbol,
             displayFormatted: parseFloat(formattedBalance).toFixed(4)
           };
-          
+
           console.log(`✅ Saldo ${tokenKey}:`, formattedBalance);
-          
+
         } catch (tokenError) {
           console.error(`❌ Erro ao buscar saldo de ${tokenKey}:`, tokenError);
           newBalances[tokenKey] = {
@@ -400,10 +576,10 @@ export const Web3Provider = ({ children }) => {
           };
         }
       }
-      
+
       setBalances(newBalances);
       console.log('✅ Saldos atualizados:', newBalances);
-      
+
     } catch (error) {
       console.error('❌ Erro geral ao atualizar saldos:', error);
     }
@@ -417,7 +593,7 @@ export const Web3Provider = ({ children }) => {
     try {
       const signer = await provider.getSigner();
       const tokenConfig = TOKENS[tokenSymbol];
-      
+
       if (!tokenConfig) {
         throw new Error('Unsupported token');
       }
@@ -425,7 +601,7 @@ export const Web3Provider = ({ children }) => {
       // Converter endereços para checksum correto
       const checksumTokenAddress = ethers.getAddress(tokenConfig.address);
       const checksumToAddress = ethers.getAddress(toAddress);
-      
+
       const contract = new ethers.Contract(
         checksumTokenAddress,
         tokenConfig.abi,
@@ -434,9 +610,9 @@ export const Web3Provider = ({ children }) => {
 
       const decimals = await contract.decimals();
       const amountInWei = ethers.parseUnits(amount.toString(), decimals);
-      
+
       const tx = await contract.transfer(checksumToAddress, amountInWei);
-      
+
       return {
         hash: tx.hash,
         wait: () => tx.wait()
@@ -449,7 +625,7 @@ export const Web3Provider = ({ children }) => {
 
   const generatePaymentQR = async (amountBRL, tokenSymbol = 'PSPAY') => {
     if (!account) return null;
-    
+
     const tokenConfig = TOKENS[tokenSymbol];
     if (!tokenConfig) return null;
 
@@ -468,7 +644,7 @@ export const Web3Provider = ({ children }) => {
 
       // Create EIP-681 payment request URI like in original script.js
       const uri = `ethereum:${tokenConfig.address}@56/transfer?address=${account}&uint256=${amountInWei}`;
-      
+
       return {
         uri,
         amountToken,
@@ -486,7 +662,7 @@ export const Web3Provider = ({ children }) => {
     try {
       const response = await fetch('https://openexchangerates.org/api/latest.json?app_id=b72524c6a1204affb3aac6c0c657aca5');
       const data = await response.json();
-      return data.rates.BRL; 
+      return data.rates.BRL;
     } catch (error) {
       console.error('Erro ao buscar taxa de câmbio:', error);
       return 5.0; // Fallback BRL rate
@@ -524,11 +700,11 @@ export const Web3Provider = ({ children }) => {
     try {
       const tokenPrice = await getTokenPrice(tokenSymbol);
       const usdValue = amount * tokenPrice;
-      
+
       // Convert USD to BRL (mock exchange rate)
       const exchangeRate = 5.0; // Mock BRL/USD rate
       const fiatValue = usdValue * exchangeRate;
-      
+
       return {
         usd: usdValue,
         [fiatCurrency.toLowerCase()]: fiatValue
