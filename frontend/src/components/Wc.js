@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { useWeb3 } from '../contexts/Web3Context';
 import { Wallet, Coins, TrendingUp, RefreshCw, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,12 +11,10 @@ const WalletComponent = () => {
     setSelectedToken,
     tokens,
     connectWallet,
-    disconnectWallet,
     updateBalances,
     isConnecting,
     networkError
-  ,
-  fullDisconnect } = useWeb3();
+  } = useWeb3();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -69,7 +67,17 @@ const WalletComponent = () => {
           ) : (
             'Conectar Carteira'
           )}
-       
+        </button>
+      
+        {account && (
+            <button
+                onClick={fullDisconnect}
+                    className="mt-4 w-full py-2 px-4 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition"
+                      >
+                          Desconectar
+                            </button>
+                            )}
+        
       </div>
     );
   }

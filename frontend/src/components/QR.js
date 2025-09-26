@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import jsQR from 'jsqr';
 
 const QRScannerModal = ({ isOpen, onClose }) => {
-  const { sendTransaction, account, tokens } = useWeb3();
+  const { sendTransaction, account } = useWeb3();
   const [isScanning, setIsScanning] = useState(false);
   const [scannedData, setScannedData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -173,11 +173,7 @@ const QRScannerModal = ({ isOpen, onClose }) => {
         recipientAddress = parsedData.recipientAddress;
         amount = parsedData.amount;
         // Determine token based on contract address
-        tokenSymbol = 'PSPAY';
-        if (parsedData.tokenAddress) {
-          const found = tokens && Object.values(tokens).find(t => (t.address || t)?.toLowerCase && (t.address || t).toLowerCase() === parsedData.tokenAddress.toLowerCase());
-          if (found) tokenSymbol = found.symbol || Object.keys(tokens).find(k => tokens[k].address.toLowerCase() === found.address.toLowerCase()) || tokenSymbol;
-        }
+        tokenSymbol = 'PSPAY'; // Default, should be determined by contract address
       } else if (parsedData.type === 'address') {
         // Manual input needed
         const inputAmount = prompt('Digite o valor a ser enviado:');
