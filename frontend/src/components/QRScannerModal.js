@@ -3,6 +3,7 @@ import { useWeb3 } from '../contexts/Web3Context';
 import { X, Camera, Upload, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import jsQR from 'jsqr';
+import { ethers } from 'ethers'; // Importe o ethers para conversão segura
 
 const QRScannerModal = ({ isOpen, onClose }) => {
   const { sendTransaction, account, tokens } = useWeb3();
@@ -114,12 +115,11 @@ const QRScannerModal = ({ isOpen, onClose }) => {
 
   const parseQRData = (data) => {
     try {
-      // Try to parse as EIP-681 URI
+      // Tenta interpretar como URI EIP-681
       if (data.startsWith('ethereum:')) {
         const url = new URL(data);
-        const pathParts = url.pathname.split('/');
+        const pathParts = url.pathname.split('@')[0].split('/');
         const tokenAddress = pathParts[0];
-        const functionName = pathParts[1];
         
         const params = new URLSearchParams(url.search);
         const recipientAddress = params.get('address');
@@ -129,12 +129,12 @@ const QRScannerModal = ({ isOpen, onClose }) => {
           type: 'payment',
           tokenAddress,
           recipientAddress,
-          amount,
+          amount, // Este valor está em Wei
           rawData: data
         };
       }
       
-      // Try to parse as JSON
+      // Tenta interpretar como JSON
       const jsonData = JSON.parse(data);
       return {
         type: 'json',
@@ -142,7 +142,7 @@ const QRScannerModal = ({ isOpen, onClose }) => {
         rawData: data
       };
     } catch (error) {
-      // Treat as plain text address
+      // Trata como endereço de texto puro
       if (data.match(/^0x[a-fA-F0-9]{40}$/)) {
         return {
           type: 'address',
@@ -157,56 +157,79 @@ const QRScannerModal = ({ isOpen, onClose }) => {
       };
     }
   };
-
+  
+  // =====================================================================
+  // FUNÇÃO DE PAGAMENTO CORRIGIDA
+  // =====================================================================
   const processPayment = async (parsedData) => {
     if (!account) {
       toast.error('Conecte sua carteira primeiro');
       return;
     }
-
+  
     setIsProcessing(true);
-
+  
     try {
-      let recipientAddress, amount, tokenSymbol;
-
+      let recipientAddress, amountInEther, tokenSymbol;
+  
       if (parsedData.type === 'payment') {
         recipientAddress = parsedData.recipientAddress;
-        amount = parsedData.amount;
-        // Determine token based on contract address
-        tokenSymbol = 'PSPAY';
+        
+        // CORREÇÃO: Converte o valor de Wei para Ether (formato legível)
+        // usando a biblioteca ethers para mais segurança.
+        // Assumimos 18 decimais como padrão, mas idealmente seria pego do tokenInfo.
+        let decimals = 18; 
+        
+        tokenSymbol = 'PSPAY'; // Valor padrão
         if (parsedData.tokenAddress) {
-          const found = tokens && Object.values(tokens).find(t => (t.address || t)?.toLowerCase && (t.address || t).toLowerCase() === parsedData.tokenAddress.toLowerCase());
-          if (found) tokenSymbol = found.symbol || Object.keys(tokens).find(k => tokens[k].address.toLowerCase() === found.address.toLowerCase()) || tokenSymbol;
+          const tokenInfo = Object.values(tokens).find(t => 
+            t.address.toLowerCase() === parsedData.tokenAddress.toLowerCase()
+          );
+          if (tokenInfo) {
+            tokenSymbol = tokenInfo.symbol;
+            decimals = tokenInfo.decimals; // Usa os decimais corretos do token
+          }
         }
+        amountInEther = ethers.formatUnits(parsedData.amount, decimals);
+
       } else if (parsedData.type === 'address') {
-        // Manual input needed
+        // O prompt já retorna o valor no formato legível (Ether)
         const inputAmount = prompt('Digite o valor a ser enviado:');
-        if (!inputAmount) return;
+        if (!inputAmount || isNaN(parseFloat(inputAmount)) || parseFloat(inputAmount) <= 0) {
+          setIsProcessing(false);
+          return; // Cancela se o valor for inválido ou o usuário cancelar
+        }
         
         recipientAddress = parsedData.address;
-        amount = inputAmount;
-        tokenSymbol = 'PSPAY';
+        amountInEther = inputAmount;
+        tokenSymbol = 'PSPAY'; // Ou permitir que o usuário escolha
       } else {
         toast.error('Formato de QR Code não suportado');
+        setIsProcessing(false); // Garante que o estado de processamento seja resetado
         return;
       }
-
-      // Convert from Wei if needed
-      const finalAmount = parsedData.type === 'payment' 
-        ? (parseFloat(amount) / Math.pow(10, 18)).toString()
-        : amount;
-
-      const tx = await sendTransaction(recipientAddress, finalAmount, tokenSymbol);
+  
+      // Agora, 'amountInEther' sempre contém o valor no formato correto (ex: "10.5")
+      // e a função sendTransaction (do Web3Context) cuidará da conversão para Wei.
+      const tx = await sendTransaction(recipientAddress, amountInEther, tokenSymbol);
       
       toast.success('Transação enviada! Aguarde a confirmação...');
       
       await tx.wait();
       
       toast.success('Pagamento realizado com sucesso!');
-      onClose();
+      
+      // Adicionamos o setTimeout que discutimos anteriormente para evitar
+      // o erro de UI que acontecia ao fechar o modal.
+      setTimeout(() => {
+          onClose();
+      }, 100);
+  
     } catch (error) {
       console.error('Payment failed:', error);
-      toast.error(error.message || 'Erro ao processar pagamento');
+      // Tenta extrair uma mensagem mais amigável do erro da blockchain
+      const reason = error.reason || error.message || 'Erro ao processar pagamento';
+      toast.error(reason);
     } finally {
       setIsProcessing(false);
     }
@@ -337,7 +360,7 @@ const QRScannerModal = ({ isOpen, onClose }) => {
                       <div className="flex justify-between">
                         <span className="text-slate-600">Valor:</span>
                         <span className="text-slate-900">
-                          {(parseFloat(parsedData.amount) / Math.pow(10, 18)).toFixed(4)} tokens
+                          {ethers.formatUnits(parsedData.amount, 18)} tokens
                         </span>
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-import React from 'react'; // Removido useState e useEffect, pois não são usados aqui
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Web3Provider } from './contexts/Web3Context';
@@ -29,15 +29,12 @@ const ProtectedRoute = ({ children, requiredUserType }) => {
   }
 
   if (requiredUserType && user.user_type !== requiredUserType) {
-    // Redireciona para a dashboard correta se o tipo de usuário for diferente
-    const homePath = user.user_type === 'client' ? '/client-dashboard' : '/merchant-dashboard';
-    return <Navigate to={homePath} replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
 };
 
-// O componente AppContent permanece o mesmo, mas sem o Toaster
 function AppContent() {
   const { user, loading } = useAuth();
 
@@ -53,13 +50,25 @@ function AppContent() {
     <div className="App">
       <Router>
         <Routes>
+          {/* Public Routes */}
           <Route path="/welcome" element={!user ? <WelcomePage /> : <Navigate to="/" replace />} />
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" replace />} />
           <Route path="/register/:type" element={!user ? <RegisterPage /> : <Navigate to="/" replace />} />
           
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          {/* Protected Routes */}
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
           
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* Dashboard Routes */}
           <Route path="/" element={
             user ? (
               user.user_type === 'client' ? 
@@ -70,11 +79,20 @@ function AppContent() {
             )
           } />
           
-          <Route path="/client-dashboard" element={<ProtectedRoute requiredUserType="client"><ClientDashboard /></ProtectedRoute>} />
-          <Route path="/merchant-dashboard" element={<ProtectedRoute requiredUserType="merchant"><MerchantDashboard /></ProtectedRoute>} />
+          <Route path="/client-dashboard" element={
+            <ProtectedRoute requiredUserType="client">
+              <ClientDashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/merchant-dashboard" element={
+            <ProtectedRoute requiredUserType="merchant">
+              <MerchantDashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </Router>
-      {/* O Toaster foi movido para o componente App principal */}
+      <Toaster position="top-right" richColors />
     </div>
   );
 }
@@ -84,12 +102,6 @@ function App() {
     <AuthProvider>
       <Web3Provider>
         <AppContent />
-        {/* ========================================================= */}
-        {/* CORREÇÃO APLICADA AQUI */}
-        {/* O Toaster é posicionado aqui para ser renderizado uma única */}
-        {/* vez e no nível mais alto, evitando conflitos. */}
-        {/* ========================================================= */}
-        <Toaster position="top-right" richColors />
       </Web3Provider>
     </AuthProvider>
   );

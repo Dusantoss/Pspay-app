@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useWeb3 } from '../contexts/Web3Context';
@@ -15,7 +15,7 @@ import {
   EyeOff,
   TrendingUp,
   Scan,
-  Power
+  Power // Ícone adicionado
 } from 'lucide-react';
 import { toast } from 'sonner';
 import WalletComponent from '../components/WalletComponent';
@@ -26,91 +26,20 @@ import QRScannerModal from '../components/QRScannerModal';
 
 const ClientDashboard = () => {
   const { user, logout } = useAuth();
-  // =====================================================================
-  // CORREÇÃO: Puxando as funções necessárias para o cálculo de preço
-  // =====================================================================
-  const { 
-    account, 
-    balances, 
-    connectWallet, 
-    isConnecting, 
-    disconnectWallet,
-    getTokenPrice,
-    fetchExchangeRate
-  } = useWeb3();
-
+  // Adicionando a função disconnectWallet
+  const { account, balances, connectWallet, isConnecting, disconnectWallet } = useWeb3();
   const [activeTab, setActiveTab] = useState('wallet');
   const [showBalance, setShowBalance] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
-  
-  // =====================================================================
-  // CORREÇÃO: Novo estado para armazenar o saldo total em BRL
-  // =====================================================================
-  const [totalBalanceBRL, setTotalBalanceBRL] = useState(0);
-  const [isCalculatingBalance, setIsCalculatingBalance] = useState(true);
-const navItems = [
-      { id: 'wallet', label: 'Carteira', icon: Wallet },
-          { id: 'history', label: 'Histórico', icon: History },
-              { id: 'map', label: 'Lojas', icon: MapPin },
-                ];
 
+  const navItems = [
+    { id: 'wallet', label: 'Carteira', icon: Wallet },
+    { id: 'history', label: 'Histórico', icon: History },
+    { id: 'map', label: 'Lojas', icon: MapPin },
+  ];
 
-  // =====================================================================
-  // CORREÇÃO: useEffect para calcular o saldo total sempre que os saldos mudarem
-  // =====================================================================
-  useEffect(() => {
-    // Esta função interna calcula o valor real dos tokens
-    const calculateTotalBalance = async () => {
-      // Se não houver saldos, define o total como 0 e para a execução
-      if (!balances || Object.keys(balances).length === 0) {
-        setTotalBalanceBRL(0);
-        setIsCalculatingBalance(false);
-        return;
-      }
-      
-      setIsCalculatingBalance(true);
-      try {
-        // 1. Busca a cotação atual do Dólar para o Real
-        const brlRate = await fetchExchangeRate();
-        let totalValueInBRL = 0;
-
-        // 2. Cria uma lista de "promessas" para buscar o preço de cada token
-        const pricePromises = Object.entries(balances).map(async ([tokenKey, balanceData]) => {
-          if (balanceData && balanceData.formatted) {
-            // Busca o preço do token em USD
-            const tokenPriceUSD = await getTokenPrice(tokenKey);
-            // Pega a quantidade de tokens que o usuário possui
-            const tokenAmount = parseFloat(balanceData.formatted);
-            // Calcula o valor desse token em USD
-            const valueInUSD = tokenAmount * tokenPriceUSD;
-            // Converte o valor de USD para BRL e retorna
-            return valueInUSD * brlRate;
-          }
-          return 0; // Retorna 0 se não houver dados de saldo
-        });
-        
-        // 3. Executa todas as buscas de preço em paralelo para ser mais rápido
-        const results = await Promise.all(pricePromises);
-        
-        // 4. Soma os resultados de cada token para obter o valor total em BRL
-        totalValueInBRL = results.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-        
-        // 5. Atualiza o estado com o valor total correto
-        setTotalBalanceBRL(totalValueInBRL);
-      } catch (error) {
-        console.error("Erro ao calcular saldo total:", error);
-        setTotalBalanceBRL(0); // Zera o saldo em caso de erro na busca
-      } finally {
-        setIsCalculatingBalance(false); // Finaliza o estado de "carregando"
-      }
-    };
-    
-    // Chama a função de cálculo
-    calculateTotalBalance();
-  }, [balances, getTokenPrice, fetchExchangeRate]); // Dependências do useEffect
-
-  
+  // Função de logout aprimorada
   const handleLogout = () => {
     if(account) {
       disconnectWallet();
@@ -132,7 +61,16 @@ const navItems = [
     }
   };
 
-  // A função antiga e incorreta getTotalBalance foi removida.
+  const getTotalBalance = () => {
+    if (!balances || Object.keys(balances).length === 0) return 0;
+    let total = 0;
+    Object.entries(balances).forEach(([token, balance]) => {
+      const value = parseFloat(balance.formatted) || 0;
+      const rate = token === 'USDT' ? 5.0 : 0.5; // BRL conversion
+      total += value * rate;
+    });
+    return total;
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -188,6 +126,7 @@ const navItems = [
                     <Settings className="w-4 h-4 mr-3" />
                     Configurações
                   </Link>
+                  {/* Botão para desconectar apenas a carteira */}
                   {account && (
                     <button 
                       onClick={() => {
@@ -231,14 +170,9 @@ const navItems = [
               <div>
                 <p className="text-blue-100 text-sm">Saldo Total</p>
                 <div className="flex items-center mt-1">
-                  {isCalculatingBalance ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : showBalance ? (
+                  {showBalance ? (
                     <h3 className="text-2xl font-bold">
-                      {/* ===================================================================== */}
-                      {/* CORREÇÃO: Exibindo o estado com o valor real em BRL */}
-                      {/* ===================================================================== */}
-                      R$ {totalBalanceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      R$ {getTotalBalance().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </h3>
                   ) : (
                     <h3 className="text-2xl font-bold">R$ ••••••</h3>

@@ -17,15 +17,12 @@ import {
   DollarSign,
   ShoppingBag,
   Users,
-  Plus,
   Receipt,
-  MapPin,
-  Calendar,
-  ArrowUpRight,
-  ArrowDownLeft
+  ArrowDownLeft,
+  Power // Ícone adicionado
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import ReceivePaymentModal from '../components/ReceivePaymentModal';
 import ReceivePaymentSection from '../components/ReceivePaymentSection';
 import ProductManagement from '../components/ProductManagement';
@@ -34,7 +31,8 @@ import QuickReceiveForm from '../components/QuickReceiveForm';
 
 const MerchantDashboard = () => {
   const { user, logout } = useAuth();
-  const { account, balances, connectWallet, isConnecting } = useWeb3();
+  // Adicionando a função disconnectWallet
+  const { account, balances, connectWallet, isConnecting, disconnectWallet } = useWeb3();
   const [activeTab, setActiveTab] = useState('overview');
   const [showBalance, setShowBalance] = useState(true);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
@@ -51,228 +49,116 @@ const MerchantDashboard = () => {
     { id: 'store', label: 'Loja', icon: Store },
   ];
 
-  // Mock data for charts
-  const salesData = [
-    { name: 'Jan', vendas: 4000, receita: 2400 },
-    { name: 'Fev', vendas: 3000, receita: 1398 },
-    { name: 'Mar', vendas: 2000, receita: 9800 },
-    { name: 'Abr', vendas: 2780, receita: 3908 },
-    { name: 'Mai', vendas: 1890, receita: 4800 },
-    { name: 'Jun', vendas: 2390, receita: 3800 },
-  ];
-
-  const tokenDistribution = [
-    { name: 'PSPAY', value: 65, color: '#1e3a8a' },
-    { name: 'USDT', value: 35, color: '#f97316' },
-  ];
-
-  const recentTransactions = [
-    {
-      id: '1',
-      amount: 150.00,
-      token: 'PSPAY',
-      customer: 'João Silva',
-      time: '2 min atrás',
-      status: 'completed'
-    },
-    {
-      id: '2',
-      amount: 89.50,
-      token: 'USDT',
-      customer: 'Maria Santos',
-      time: '15 min atrás',
-      status: 'completed'
-    },
-    {
-      id: '3',
-      amount: 220.00,
-      token: 'PSPAY',
-      customer: 'Pedro Oliveira',
-      time: '1 hora atrás',
-      status: 'pending'
-    },
-  ];
+  const salesData = [ { name: 'Jan', vendas: 4000 }, { name: 'Fev', vendas: 3000 }, { name: 'Mar', vendas: 2000 }, { name: 'Abr', vendas: 2780 }, { name: 'Mai', vendas: 1890 }, { name: 'Jun', vendas: 2390 }, ];
+  const tokenDistribution = [ { name: 'PSPAY', value: 65, color: '#1e3a8a' }, { name: 'USDT', value: 35, color: '#f97316' }, ];
+  const recentTransactions = [ { id: '1', amount: 150.00, token: 'PSPAY', customer: 'João Silva', time: '2 min atrás', status: 'completed' }, { id: '2', amount: 89.50, token: 'USDT', customer: 'Maria Santos', time: '15 min atrás', status: 'completed' }, { id: '3', amount: 220.00, token: 'PSPAY', customer: 'Pedro Oliveira', time: '1 hora atrás', status: 'pending' }, ];
 
   useEffect(() => {
-    // Load analytics data
     fetchAnalytics();
   }, []);
 
   const fetchAnalytics = async () => {
-    try {
-      // In a real app, this would be an API call
-      // For now, using mock data
-      setAnalytics({
-        total_revenue: 15350.75,
-        transaction_count: 142,
-        avg_transaction: 108.17
-      });
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-    }
+    setAnalytics({ total_revenue: 15350.75, transaction_count: 142, avg_transaction: 108.17 });
   };
 
+  // Função de logout aprimorada
   const handleLogout = () => {
+    if(account) {
+      disconnectWallet();
+    }
     logout();
+    toast.success("Você saiu da sua conta.");
   };
 
   const getTotalBalance = () => {
     if (!balances || Object.keys(balances).length === 0) return 0;
-    
     let total = 0;
     Object.entries(balances).forEach(([token, balance]) => {
       const value = parseFloat(balance.formatted) || 0;
       const rate = token === 'USDT' ? 5.0 : 0.5;
       total += value * rate;
     });
-    
     return total;
   };
 
   const renderOverview = () => (
     <div className="space-y-6">
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">Receita Total</p>
-              <p className="text-2xl font-bold text-slate-900">
-                R$ {analytics.total_revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </p>
+              <p className="text-2xl font-bold text-slate-900">R$ {analytics.total_revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-600" />
-            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"><DollarSign className="w-6 h-6 text-green-600" /></div>
           </div>
-          <div className="flex items-center mt-4 text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-500">+12.5%</span>
-            <span className="text-slate-500 ml-1">vs mês anterior</span>
-          </div>
+          <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+12.5%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
         </div>
-
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">Transações</p>
               <p className="text-2xl font-bold text-slate-900">{analytics.transaction_count}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Receipt className="w-6 h-6 text-blue-600" />
-            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><Receipt className="w-6 h-6 text-blue-600" /></div>
           </div>
-          <div className="flex items-center mt-4 text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-500">+8.2%</span>
-            <span className="text-slate-500 ml-1">vs mês anterior</span>
-          </div>
+           <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+8.2%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
         </div>
-
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">Ticket Médio</p>
-              <p className="text-2xl font-bold text-slate-900">
-                R$ {analytics.avg_transaction.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </p>
+              <p className="text-2xl font-bold text-slate-900">R$ {analytics.avg_transaction.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-              <ShoppingBag className="w-6 h-6 text-orange-600" />
-            </div>
+            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"><ShoppingBag className="w-6 h-6 text-orange-600" /></div>
           </div>
-          <div className="flex items-center mt-4 text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-500">+3.1%</span>
-            <span className="text-slate-500 ml-1">vs mês anterior</span>
-          </div>
+           <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+3.1%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
         </div>
-
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">Clientes Únicos</p>
               <p className="text-2xl font-bold text-slate-900">89</p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <Users className="w-6 h-6 text-purple-600" />
-            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"><Users className="w-6 h-6 text-purple-600" /></div>
           </div>
-          <div className="flex items-center mt-4 text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-500">+15.7%</span>
-            <span className="text-slate-500 ml-1">vs mês anterior</span>
-          </div>
+           <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+15.7%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
         </div>
       </div>
-
-      {/* Charts Section */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Sales Chart */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Vendas Mensais</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={salesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="vendas" fill="#1e3a8a" />
-            </BarChart>
+            <BarChart data={salesData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis /><Tooltip /><Bar dataKey="vendas" fill="#1e3a8a" /></BarChart>
           </ResponsiveContainer>
         </div>
-
-        {/* Token Distribution */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Distribuição por Token</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie
-                data={tokenDistribution}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                dataKey="value"
-                label={({ name, value }) => `${name}: ${value}%`}
-              >
-                {tokenDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
+              <Pie data={tokenDistribution} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}%`}>
+                {tokenDistribution.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
+              </Pie><Tooltip />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* Recent Transactions */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-        <div className="p-6 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">Transações Recentes</h3>
-        </div>
+        <div className="p-6 border-b border-slate-200"><h3 className="text-lg font-semibold text-slate-900">Transações Recentes</h3></div>
         <div className="p-6">
           <div className="space-y-4">
             {recentTransactions.map((transaction) => (
               <div key={transaction.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-900 to-blue-700 rounded-full flex items-center justify-center mr-4">
-                    <ArrowDownLeft className="w-5 h-5 text-white" />
-                  </div>
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-900 to-blue-700 rounded-full flex items-center justify-center mr-4"><ArrowDownLeft className="w-5 h-5 text-white" /></div>
                   <div>
                     <p className="font-medium text-slate-900">{transaction.customer}</p>
                     <p className="text-sm text-slate-600">{transaction.time}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-slate-900">
-                    R$ {transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <div className="flex items-center">
-                    <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                      transaction.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'
-                    }`}></span>
-                    <span className="text-sm text-slate-600">{transaction.token}</span>
-                  </div>
+                  <p className="font-semibold text-slate-900">R$ {transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <div className="flex items-center"><span className={`inline-block w-2 h-2 rounded-full mr-2 ${transaction.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`}></span><span className="text-sm text-slate-600">{transaction.token}</span></div>
                 </div>
               </div>
             ))}
@@ -284,22 +170,16 @@ const MerchantDashboard = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'overview':
-        return renderOverview();
-      case 'receive':
-        return <ReceivePaymentSection />;
-      case 'products':
-        return <ProductManagement />;
-      case 'store':
-        return <StoreManagement />;
-      default:
-        return renderOverview();
+      case 'overview': return renderOverview();
+      case 'receive': return <ReceivePaymentSection />;
+      case 'products': return <ProductManagement />;
+      case 'store': return <StoreManagement />;
+      default: return renderOverview();
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
       <header className="bg-slate-100 shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -311,10 +191,7 @@ const MerchantDashboard = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowReceiveModal(true)}
-                className="hidden sm:flex items-center px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:from-orange-500 hover:to-orange-400 transition-all"
-              >
+              <button onClick={() => setShowReceiveModal(true)} className="hidden sm:flex items-center px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:from-orange-500 hover:to-orange-400 transition-all">
                 <QrCode className="w-4 h-4 mr-2" />
                 Receber
               </button>
@@ -327,44 +204,38 @@ const MerchantDashboard = () => {
                 <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-slate-100 transition-colors">
                   <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200">
                     {user?.profile?.profile_picture ? (
-                      <img 
-                        src={user.profile.profile_picture} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={user.profile.profile_picture} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-orange-600 to-orange-500">
-                        <span className="text-white text-sm font-bold">
-                          {user?.name?.charAt(0)?.toUpperCase()}
-                        </span>
+                        <span className="text-white text-sm font-bold">{user?.name?.charAt(0)?.toUpperCase()}</span>
                       </div>
                     )}
                   </div>
-                  <span className="text-sm font-medium text-slate-900 hidden sm:block">
-                    {user?.profile?.business_name || user?.name}
-                  </span>
+                  <span className="text-sm font-medium text-slate-900 hidden sm:block">{user?.profile?.business_name || user?.name}</span>
                 </button>
                 
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <Link 
-                    to="/profile" 
-                    className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                  >
-                    <User className="w-4 h-4 mr-3" />
-                    Meu Perfil
+                  <Link to="/profile" className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    <User className="w-4 h-4 mr-3" /> Meu Perfil
                   </Link>
-                  <Link 
-                    to="/settings" 
-                    className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                  >
-                    <Settings className="w-4 h-4 mr-3" />
-                    Configurações
+                  <Link to="/settings" className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    <Settings className="w-4 h-4 mr-3" /> Configurações
                   </Link>
+                   {/* Botão para desconectar apenas a carteira */}
+                   {account && (
+                    <button 
+                      onClick={() => {
+                        disconnectWallet();
+                        toast.info('Carteira desconectada.');
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    >
+                      <Power className="w-4 h-4 mr-3" />
+                      Desconectar Carteira
+                    </button>
+                  )}
                   <hr className="my-1" />
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
+                  <button onClick={handleLogout} className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                     <LogOut className="w-4 h-4 mr-3" />
                     Sair
                   </button>
@@ -376,7 +247,6 @@ const MerchantDashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">
             {user?.profile?.business_name ? 
@@ -389,7 +259,6 @@ const MerchantDashboard = () => {
           </p>
         </div>
 
-        {/* Balance Overview */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="md:col-span-2 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between mb-4">
@@ -431,7 +300,6 @@ const MerchantDashboard = () => {
             </div>
           </div>
 
-          {/* Wallet Status & Quick Receive */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-semibold text-slate-900">Status da Carteira</h4>
@@ -442,12 +310,11 @@ const MerchantDashboard = () => {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Conectada</p>
-                  <p className="text-xs text-slate-500 font-mono">
-                    {account.slice(0, 6)}...{account.slice(-4)}
+                  <p className="text-xs text-slate-500 font-mono break-all">
+                    {account}
                   </p>
                 </div>
                 
-                {/* Quick Receive Section */}
                 <div className="border-t border-slate-200 pt-4">
                   <h5 className="text-sm font-medium text-slate-900 mb-3">Receber Pagamento</h5>
                   <QuickReceiveForm />
@@ -468,7 +335,6 @@ const MerchantDashboard = () => {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
           <div className="border-b border-slate-200">
             <nav className="flex space-x-8 px-6">
@@ -481,7 +347,7 @@ const MerchantDashboard = () => {
                     className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                       activeTab === item.id
                         ? 'border-orange-600 text-orange-600'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                        :'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                     }`}
                   >
                     <Icon className="w-5 h-5 mr-2" />
@@ -498,7 +364,6 @@ const MerchantDashboard = () => {
         </div>
       </div>
 
-      {/* Receive Payment Modal */}
       {showReceiveModal && (
         <ReceivePaymentModal 
           isOpen={showReceiveModal}

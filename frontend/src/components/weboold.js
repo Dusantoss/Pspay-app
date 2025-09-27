@@ -15,7 +15,8 @@ const WalletComponent = () => {
     updateBalances,
     isConnecting,
     networkError
-  } = useWeb3();
+  ,
+  fullDisconnect } = useWeb3();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -68,10 +69,10 @@ const WalletComponent = () => {
           ) : (
             'Conectar Carteira'
           )}
-       </ button>
+       
       </div>
-    );
-      }
+  
+
   return (
     <div className="space-y-6">
       {/* Wallet Address */}
@@ -97,6 +98,20 @@ const WalletComponent = () => {
               <ExternalLink className="w-4 h-4" />
             </button>
           </div>
+        </div>
+        
+        {/* Botão de Desconectar - Laranja e bem visível */}
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <button
+            onClick={() => {
+              fullDisconnect();
+              toast.success('Carteira desconectada com sucesso!');
+            }}
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-600 hover:to-orange-700 transition-all shadow-sm"
+            title="Desconectar carteira e limpar cache"
+          >
+            🔌 Desconectar e Trocar Carteira
+          </button>
         </div>
       </div>
 

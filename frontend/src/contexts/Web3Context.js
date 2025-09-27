@@ -85,7 +85,6 @@ export const Web3Provider = ({ children }) => {
     initializeWalletConnect();
     checkWalletConnection();
     
-    // Listen for account changes
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
@@ -108,7 +107,7 @@ export const Web3Provider = ({ children }) => {
       
       const wcProvider = await EthereumProvider.init({
         projectId: projectId,
-        chains: [56], // Binance Smart Chain
+        chains: [56],
         rpcMap: {
           56: 'https://bsc-dataseed.binance.org/'
         },
@@ -130,7 +129,6 @@ export const Web3Provider = ({ children }) => {
       console.log('✅ WalletConnect inicializado com sucesso');
       setWalletConnectProvider(wcProvider);
 
-      // Listeners para WalletConnect
       wcProvider.on('accountsChanged', (accounts) => {
         console.log('👥 Contas alteradas:', accounts);
         handleAccountsChanged(accounts);
@@ -149,12 +147,10 @@ export const Web3Provider = ({ children }) => {
         setBalances({});
       });
 
-      // Verificar se já existe uma sessão ativa
       if (wcProvider.connected && wcProvider.accounts?.length > 0) {
         console.log('🔗 Sessão WalletConnect existente encontrada');
         setAccount(wcProvider.accounts[0]);
         
-        // Configurar providers
         const ethProvider = new ethers.BrowserProvider(wcProvider);
         const web3Instance = new Web3(wcProvider);
         setProvider(ethProvider);
@@ -200,25 +196,22 @@ export const Web3Provider = ({ children }) => {
   const handleChainChanged = async (chainId) => {
     console.log('🌐 Chain changed to:', chainId);
     
-    // Converter para decimal se necessário
     const numericChainId = typeof chainId === 'string' ? parseInt(chainId, 16) : chainId;
     
     if (numericChainId !== 56) {
       console.log('⚠️ Rede incorreta. Mudando para BSC...');
       setNetworkError('Por favor, conecte-se à Binance Smart Chain (BSC)');
       
-      // Tentar mudar para BSC automaticamente
       if (window.ethereum) {
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x38' }], // BSC
+            params: [{ chainId: '0x38' }],
           });
           setNetworkError(null);
         } catch (switchError) {
           console.error('Erro ao mudar para BSC:', switchError);
           if (switchError.code === 4902) {
-            // Tentar adicionar BSC se não existir
             try {
               await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
@@ -235,7 +228,6 @@ export const Web3Provider = ({ children }) => {
       console.log('✅ Conectado à BSC (Chain 56)');
       setNetworkError(null);
       
-      // Atualizar saldos quando voltar para BSC
       if (account && provider) {
         updateBalances();
       }
@@ -250,35 +242,29 @@ export const Web3Provider = ({ children }) => {
       let walletProvider;
 
       if (useWalletConnect && walletConnectProvider) {
-        // Usar WalletConnect
         await walletConnectProvider.enable();
         walletProvider = walletConnectProvider;
         console.log('Conectado via WalletConnect');
       } else {
-        // Usar MetaMask/carteira injetada
         if (!window.ethereum) {
           setNetworkError('Por favor, instale MetaMask ou use WalletConnect');
           throw new Error('Nenhuma carteira detectada');
         }
-
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         walletProvider = window.ethereum;
         console.log('Conectado via MetaMask');
       }
 
-      // Create provider and web3 instance
       const ethProvider = new ethers.BrowserProvider(walletProvider);
       const web3Instance = new Web3(walletProvider);
       
       setProvider(ethProvider);
       setWeb3(web3Instance);
       
-      // Get current account
       const signer = await ethProvider.getSigner();
       const address = await signer.getAddress();
       setAccount(address);
 
-      // Check if we're on BSC
       const network = await ethProvider.getNetwork();
       console.log('Connected to network:', network.chainId);
       
@@ -291,9 +277,7 @@ export const Web3Provider = ({ children }) => {
         }
       }
 
-      // Store connection method
       localStorage.setItem('walletConnection', useWalletConnect ? 'walletconnect' : 'injected');
-
       return address;
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -313,7 +297,6 @@ export const Web3Provider = ({ children }) => {
         params: [{ chainId: BSC_NETWORK.chainId }],
       });
     } catch (switchError) {
-      // This error code indicates that the chain has not been added to MetaMask
       if (switchError.code === 4902) {
         try {
           await window.ethereum.request({
@@ -332,22 +315,14 @@ export const Web3Provider = ({ children }) => {
   };
 
   const updateBalances = async () => {
-    if (!account || !provider) {
-      console.log('❌ updateBalances: account ou provider não disponível');
-      return;
-    }
+    if (!account || !provider) return;
 
-    // Verificar se estamos na BSC antes de buscar saldos
     try {
       const network = await provider.getNetwork();
-      console.log('🌐 Rede atual:', network.chainId);
-      
       if (Number(network.chainId) !== 56) {
-        console.log('⚠️ Não está na BSC. Pulando busca de saldos.');
         setNetworkError('Por favor, conecte-se à Binance Smart Chain (BSC) para ver os saldos');
         return;
       }
-      
       setNetworkError(null);
     } catch (networkError) {
       console.error('❌ Erro ao verificar rede:', networkError);
@@ -358,93 +333,106 @@ export const Web3Provider = ({ children }) => {
     
     try {
       const newBalances = {};
-      
       for (const [tokenKey, tokenConfig] of Object.entries(TOKENS)) {
         try {
-          console.log(`🔍 Buscando saldo de ${tokenKey}...`);
-          
-          // Converter endereço para checksum correto
           const checksumAddress = ethers.getAddress(tokenConfig.address.toLowerCase());
-          console.log(`📝 Endereço ${tokenKey} (checksum):`, checksumAddress);
-          
-          const contract = new ethers.Contract(
-            checksumAddress,
-            tokenConfig.abi,
-            provider
-          );
-          
+          const contract = new ethers.Contract(checksumAddress, tokenConfig.abi, provider);
           const [balance, decimals] = await Promise.all([
             contract.balanceOf(account),
             contract.decimals()
           ]);
-          
           const formattedBalance = ethers.formatUnits(balance, decimals);
-          
           newBalances[tokenKey] = {
             raw: balance.toString(),
             formatted: formattedBalance,
             symbol: tokenConfig.symbol,
             displayFormatted: parseFloat(formattedBalance).toFixed(4)
           };
-          
           console.log(`✅ Saldo ${tokenKey}:`, formattedBalance);
-          
         } catch (tokenError) {
           console.error(`❌ Erro ao buscar saldo de ${tokenKey}:`, tokenError);
-          newBalances[tokenKey] = {
-            raw: '0',
-            formatted: '0',
-            symbol: tokenConfig.symbol,
-            displayFormatted: '0.0000',
-            error: tokenError.message
-          };
+          newBalances[tokenKey] = { raw: '0', formatted: '0', symbol: tokenConfig.symbol, displayFormatted: '0.0000', error: tokenError.message };
         }
       }
-      
       setBalances(newBalances);
       console.log('✅ Saldos atualizados:', newBalances);
-      
     } catch (error) {
       console.error('❌ Erro geral ao atualizar saldos:', error);
     }
   };
 
   const sendTransaction = async (toAddress, amount, tokenSymbol = 'PSPAY') => {
-    if (!provider || !account) {
-      throw new Error('Wallet not connected');
-    }
+    if (!provider || !account) throw new Error('Wallet not connected');
 
     try {
       const signer = await provider.getSigner();
       const tokenConfig = TOKENS[tokenSymbol];
-      
-      if (!tokenConfig) {
-        throw new Error('Unsupported token');
-      }
+      if (!tokenConfig) throw new Error('Unsupported token');
 
-      // Converter endereços para checksum correto
       const checksumTokenAddress = ethers.getAddress(tokenConfig.address.toLowerCase());
       const checksumToAddress = ethers.getAddress(toAddress.toLowerCase());
       
-      const contract = new ethers.Contract(
-        checksumTokenAddress,
-        tokenConfig.abi,
-        signer
-      );
-
+      const contract = new ethers.Contract(checksumTokenAddress, tokenConfig.abi, signer);
       const decimals = await contract.decimals();
       const amountInWei = ethers.parseUnits(amount.toString(), decimals);
       
       const tx = await contract.transfer(checksumToAddress, amountInWei);
       
-      return {
-        hash: tx.hash,
-        wait: () => tx.wait()
-      };
+      return { hash: tx.hash, wait: () => tx.wait() };
     } catch (error) {
       console.error('Transaction failed:', error);
       throw error;
     }
+  };
+
+  // =====================================================================
+  //  FUNÇÃO DE BUSCA DE PREÇO CORRIGIDA
+  // =====================================================================
+  const fetchPriceFromGeckoTerminal = async (tokenSymbol) => {
+    // Para USDT, o preço é sempre ~1 USD
+    if (tokenSymbol === 'USDT') {
+      return 1.0;
+    }
+  
+    // Para PSPAY, buscamos na API da pool específica
+    if (tokenSymbol === 'PSPAY') {
+      try {
+        const poolAddress = "0xc5ff521f620d26508c238f064085f06af360ed1f";
+        const url = `https://api.geckoterminal.com/api/v2/networks/bsc/pools/${poolAddress}`;
+        
+        const response = await fetch(url); // Requisição GET (padrão)
+        if (!response.ok) {
+          throw new Error(`Erro na API GeckoTerminal: ${response.statusText}`);
+        }
+        const apiData = await response.json();
+  
+        // Pega o ID do token base na resposta da API
+        const baseTokenId = apiData.data.relationships.base_token.data.id;
+        
+        // Pega o endereço do nosso token PSPAY para verificação
+        const pspayAddress = TOKENS.PSPAY.address;
+  
+        // Confirma que o 'base_token' da API é realmente o nosso PSPAY
+        if (baseTokenId.toLowerCase().includes(pspayAddress.toLowerCase())) {
+          // Se for, pegamos o preço exato dele em USD
+          const priceUSD = parseFloat(apiData.data.attributes.base_token_price_usd);
+          
+          console.log(`Preço do PSPAY (GeckoTerminal): $${priceUSD}`);
+          return priceUSD;
+        } else {
+          // Esta mensagem de erro aparecerá se a estrutura da pool mudar no futuro
+          throw new Error("O token PSPAY não foi encontrado como o 'base_token' na pool.");
+        }
+  
+      } catch (error) {
+        console.error("Erro ao buscar preço no GeckoTerminal:", error);
+        // Mantemos um preço de fallback em caso de falha total da API
+        return 0.10; 
+      }
+    }
+  
+    // Retorna 0 para qualquer outro token não configurado
+    return 0;
   };
 
   const generatePaymentQR = async (amountBRL, tokenSymbol = 'PSPAY') => {
@@ -454,11 +442,11 @@ export const Web3Provider = ({ children }) => {
     if (!tokenConfig) return null;
 
     try {
-      // Convert BRL to token amount like in original script.js
       const usdRate = await fetchExchangeRate();
-      const tokenRate = await fetchTokenToUSDRate(tokenSymbol);
+      // ATUALIZADO: Usa a nova função de busca de preço
+      const tokenRate = await fetchPriceFromGeckoTerminal(tokenSymbol);
 
-      if (!usdRate || !tokenRate) {
+      if (!usdRate || !tokenRate || tokenRate === 0) {
         throw new Error('Não foi possível obter as taxas de câmbio necessárias.');
       }
 
@@ -466,7 +454,6 @@ export const Web3Provider = ({ children }) => {
       const amountToken = amountUSD / tokenRate;
       const amountInWei = ethers.parseUnits(amountToken.toString(), tokenConfig.decimals);
 
-      // Create EIP-681 payment request URI like in original script.js
       const uri = `ethereum:${tokenConfig.address}@56/transfer?address=${account}&uint256=${amountInWei}`;
       
       return {
@@ -481,7 +468,6 @@ export const Web3Provider = ({ children }) => {
     }
   };
 
-  // Fetch exchange rate (BRL to USD) like in original script.js
   const fetchExchangeRate = async () => {
     try {
       const response = await fetch('https://openexchangerates.org/api/latest.json?app_id=b72524c6a1204affb3aac6c0c657aca5');
@@ -492,32 +478,11 @@ export const Web3Provider = ({ children }) => {
       return 5.0; // Fallback BRL rate
     }
   };
-
-  // Fetch token to USD rate like in original script.js
-  const fetchTokenToUSDRate = async (tokenSymbol) => {
-    try {
-      const tokenConfig = TOKENS[tokenSymbol];
-      if (!tokenConfig) return 0;
-
-      const response = await fetch('https://api.coinbrain.com/public/coin-info', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          "56": [tokenConfig.address]
-        })
-      });
-      const data = await response.json();
-      return data[0]?.priceUsd || (tokenSymbol === 'USDT' ? 1 : 0.1);
-    } catch (error) {
-      console.error('Erro ao buscar preço do token:', error);
-      return tokenSymbol === 'USDT' ? 1 : 0.1; // Fallback prices
-    }
-  };
-
+  
+  // A antiga função fetchTokenToUSDRate foi substituída pela fetchPriceFromGeckoTerminal
+  // Mantemos getTokenPrice para compatibilidade, caso seja usado em outro lugar
   const getTokenPrice = async (tokenSymbol) => {
-    return await fetchTokenToUSDRate(tokenSymbol);
+    return await fetchPriceFromGeckoTerminal(tokenSymbol);
   };
 
   const convertToFiat = async (amount, tokenSymbol, fiatCurrency = 'BRL') => {
@@ -525,8 +490,7 @@ export const Web3Provider = ({ children }) => {
       const tokenPrice = await getTokenPrice(tokenSymbol);
       const usdValue = amount * tokenPrice;
       
-      // Convert USD to BRL (mock exchange rate)
-      const exchangeRate = 5.0; // Mock BRL/USD rate
+      const exchangeRate = await fetchExchangeRate();
       const fiatValue = usdValue * exchangeRate;
       
       return {
@@ -545,7 +509,6 @@ export const Web3Provider = ({ children }) => {
       if (walletConnectProvider && walletConnectProvider.disconnect) {
         await walletConnectProvider.disconnect().catch(()=>{});
       }
-      // remove injected listeners if present
       if (window && window.ethereum) {
         try {
           window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
@@ -581,7 +544,9 @@ const value = {
     getTokenPrice,
     convertToFiat,
     fetchExchangeRate,
-    fetchTokenToUSDRate,
+    // ATUALIZADO: exporta a nova função para consistência
+    fetchTokenToUSDRate: fetchPriceFromGeckoTerminal,
+    disconnectWallet,
   };
 
   return (

@@ -40,17 +40,7 @@ const QuickReceiveForm = () => {
         
         setQrCode(qrCodeDataURL);
         setPaymentData(paymentInfo);
-
-        // =====================================================================
-        // CORREÇÃO APLICADA AQUI:
-        // Atrasamos a chamada do toast para o próximo ciclo de eventos do
-        // navegador. Isso dá tempo para o React concluir a re-renderização
-        // do QR Code antes que a notificação tente alterar o DOM.
-        // =====================================================================
-        setTimeout(() => {
-          toast.success('QR Code gerado com sucesso!');
-        }, 0);
-        
+        toast.success('QR Code gerado com sucesso!');
       } else {
         toast.error('Erro ao gerar QR Code');
       }
