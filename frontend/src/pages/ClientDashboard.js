@@ -25,10 +25,7 @@ import PaymentModal from '../components/PaymentModal';
 import QRScannerModal from '../components/QRScannerModal';
 
 const ClientDashboard = () => {
-  const { user, logout } = useAuth();
-  // =====================================================================
-  // CORREÇÃO: Puxando as funções necessárias para o cálculo de preço
-  // =====================================================================
+  const { user, logout, token } = useAuth();
   const { 
     account, 
     balances, 
@@ -43,26 +40,50 @@ const ClientDashboard = () => {
   const [showBalance, setShowBalance] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
-  
-  // =====================================================================
-  // CORREÇÃO: Novo estado para armazenar o saldo total em BRL
-  // =====================================================================
   const [totalBalanceBRL, setTotalBalanceBRL] = useState(0);
   const [isCalculatingBalance, setIsCalculatingBalance] = useState(true);
-const navItems = [
-      { id: 'wallet', label: 'Carteira', icon: Wallet },
-          { id: 'history', label: 'Histórico', icon: History },
-              { id: 'map', label: 'Lojas', icon: MapPin },
-                ];
+  
+  // Estados para o histórico de transações
+  const [userTransactions, setUserTransactions] = useState([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
+  const navItems = [
+    { id: 'wallet', label: 'Carteira', icon: Wallet },
+    { id: 'history', label: 'Histórico', icon: History },
+    { id: 'map', label: 'Lojas', icon: MapPin },
+  ];
 
-  // =====================================================================
-  // CORREÇÃO: useEffect para calcular o saldo total sempre que os saldos mudarem
-  // =====================================================================
+  // Efeito para buscar o histórico de transações do cliente
   useEffect(() => {
-    // Esta função interna calcula o valor real dos tokens
+    const fetchHistory = async () => {
+      if (!token) return;
+      
+      setIsLoadingHistory(true);
+      try {
+        const headers = { 'Authorization': `Bearer ${token}` };
+        // Seu backend já retorna as transações do usuário logado neste endpoint
+        const response = await fetch('/api/transactions', { headers });
+        const data = await response.json();
+
+        if (response.ok) {
+          setUserTransactions(data);
+        } else {
+          throw new Error(data.detail || "Erro ao buscar histórico");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar histórico:", error);
+        toast.error("Não foi possível carregar seu histórico.");
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    fetchHistory();
+  }, [token]);
+
+  // Efeito para calcular o saldo total em BRL
+  useEffect(() => {
     const calculateTotalBalance = async () => {
-      // Se não houver saldos, define o total como 0 e para a execução
       if (!balances || Object.keys(balances).length === 0) {
         setTotalBalanceBRL(0);
         setIsCalculatingBalance(false);
@@ -71,46 +92,31 @@ const navItems = [
       
       setIsCalculatingBalance(true);
       try {
-        // 1. Busca a cotação atual do Dólar para o Real
         const brlRate = await fetchExchangeRate();
-        let totalValueInBRL = 0;
-
-        // 2. Cria uma lista de "promessas" para buscar o preço de cada token
         const pricePromises = Object.entries(balances).map(async ([tokenKey, balanceData]) => {
           if (balanceData && balanceData.formatted) {
-            // Busca o preço do token em USD
             const tokenPriceUSD = await getTokenPrice(tokenKey);
-            // Pega a quantidade de tokens que o usuário possui
             const tokenAmount = parseFloat(balanceData.formatted);
-            // Calcula o valor desse token em USD
             const valueInUSD = tokenAmount * tokenPriceUSD;
-            // Converte o valor de USD para BRL e retorna
             return valueInUSD * brlRate;
           }
-          return 0; // Retorna 0 se não houver dados de saldo
+          return 0;
         });
         
-        // 3. Executa todas as buscas de preço em paralelo para ser mais rápido
         const results = await Promise.all(pricePromises);
-        
-        // 4. Soma os resultados de cada token para obter o valor total em BRL
-        totalValueInBRL = results.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-        
-        // 5. Atualiza o estado com o valor total correto
-        setTotalBalanceBRL(totalValueInBRL);
+        const totalValue = results.reduce((acc, value) => acc + value, 0);
+        setTotalBalanceBRL(totalValue);
       } catch (error) {
         console.error("Erro ao calcular saldo total:", error);
-        setTotalBalanceBRL(0); // Zera o saldo em caso de erro na busca
+        setTotalBalanceBRL(0);
       } finally {
-        setIsCalculatingBalance(false); // Finaliza o estado de "carregando"
+        setIsCalculatingBalance(false);
       }
     };
     
-    // Chama a função de cálculo
     calculateTotalBalance();
-  }, [balances, getTokenPrice, fetchExchangeRate]); // Dependências do useEffect
+  }, [balances, getTokenPrice, fetchExchangeRate]);
 
-  
   const handleLogout = () => {
     if(account) {
       disconnectWallet();
@@ -124,15 +130,14 @@ const navItems = [
       case 'wallet':
         return <WalletComponent />;
       case 'history': 
-        return <TransactionHistory />;
+        // Passa os dados e o estado de carregamento para o componente filho
+        return <TransactionHistory transactions={userTransactions} isLoading={isLoadingHistory} />;
       case 'map':
         return <StoreMap />;
       default:
         return <WalletComponent />;
     }
   };
-
-  // A função antiga e incorreta getTotalBalance foi removida.
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -155,58 +160,32 @@ const navItems = [
                 <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-slate-100 transition-colors">
                   <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200">
                     {user?.profile?.profile_picture ? (
-                      <img 
-                        src={user.profile.profile_picture} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={user.profile.profile_picture} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-900 to-blue-700">
-                        <span className="text-white text-sm font-bold">
-                          {user?.name?.charAt(0)?.toUpperCase()}
-                        </span>
+                        <span className="text-white text-sm font-bold">{user?.name?.charAt(0)?.toUpperCase()}</span>
                       </div>
                     )}
                   </div>
-                  <span className="text-sm font-medium text-slate-900 hidden sm:block">
-                    {user?.name}
-                  </span>
+                  <span className="text-sm font-medium text-slate-900 hidden sm:block">{user?.name}</span>
                 </button>
                 
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <Link 
-                    to="/profile" 
-                    className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                  >
-                    <User className="w-4 h-4 mr-3" />
-                    Meu Perfil
+                  <Link to="/profile" className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    <User className="w-4 h-4 mr-3" /> Meu Perfil
                   </Link>
-                  <Link 
-                    to="/settings" 
-                    className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                  >
-                    <Settings className="w-4 h-4 mr-3" />
-                    Configurações
+                  <Link to="/settings" className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    <Settings className="w-4 h-4 mr-3" /> Configurações
                   </Link>
                   {account && (
-                    <button 
-                      onClick={() => {
-                        disconnectWallet();
-                        toast.info('Carteira desconectada.');
-                      }}
-                      className="w-full flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                    >
-                      <Power className="w-4 h-4 mr-3" />
-                      Desconectar Carteira
+                    <button onClick={() => { disconnectWallet(); toast.info('Carteira desconectada.'); }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                      <Power className="w-4 h-4 mr-3" /> Desconectar Carteira
                     </button>
                   )}
                   <hr className="my-1" />
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="w-4 h-4 mr-3" />
-                    Sair
+                  <button onClick={handleLogout} className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                    <LogOut className="w-4 h-4 mr-3" /> Sair
                   </button>
                 </div>
               </div>
@@ -217,12 +196,8 @@ const navItems = [
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-900">
-            Olá, {user?.name?.split(' ')[0]}! 👋
-          </h2>
-          <p className="text-slate-600 mt-1">
-            Gerencie sua carteira digital e faça pagamentos seguros
-          </p>
+          <h2 className="text-2xl font-bold text-slate-900">Olá, {user?.name?.split(' ')[0]}! 👋</h2>
+          <p className="text-slate-600 mt-1">Gerencie sua carteira digital e faça pagamentos seguros</p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -235,18 +210,12 @@ const navItems = [
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : showBalance ? (
                     <h3 className="text-2xl font-bold">
-                      {/* ===================================================================== */}
-                      {/* CORREÇÃO: Exibindo o estado com o valor real em BRL */}
-                      {/* ===================================================================== */}
                       R$ {totalBalanceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>
                   ) : (
                     <h3 className="text-2xl font-bold">R$ ••••••</h3>
                   )}
-                  <button
-                    onClick={() => setShowBalance(!showBalance)}
-                    className="ml-2 p-1 rounded-full hover:bg-blue-800 transition-colors"
-                  >
+                  <button onClick={() => setShowBalance(!showBalance)} className="ml-2 p-1 rounded-full hover:bg-blue-800 transition-colors">
                     {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -255,7 +224,6 @@ const navItems = [
                 <Wallet className="w-6 h-6" />
               </div>
             </div>
-            
             <div className="flex items-center text-blue-100 text-sm">
               <TrendingUp className="w-4 h-4 mr-1" />
               <span>+2.5% este mês</span>
@@ -263,52 +231,34 @@ const navItems = [
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-slate-900">Ações Rápidas</h4>
-            </div>
-            <div className="space-y-3">
-              <button
-                onClick={() => setShowPaymentModal(true)}
-                className="w-full flex items-center justify-center px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                Enviar
+            <h4 className="font-semibold text-slate-900">Ações Rápidas</h4>
+            <div className="space-y-3 mt-4">
+              <button onClick={() => setShowPaymentModal(true)} className="w-full flex items-center justify-center px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors">
+                <Send className="w-4 h-4 mr-2" /> Enviar
               </button>
-              <button
-                onClick={() => setShowScannerModal(true)}
-                className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-500 transition-colors"
-              >
-                <Scan className="w-4 h-4 mr-2" />
-                Pagar
+              <button onClick={() => setShowScannerModal(true)} className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-500 transition-colors">
+                <Scan className="w-4 h-4 mr-2" /> Pagar
               </button>
             </div>
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-slate-900">Carteira</h4>
-              <div className={`w-3 h-3 rounded-full ${account ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <h4 className="font-semibold text-slate-900">Carteira</h4>
+            <div className="mt-4">
+              {account ? (
+                <div>
+                  <p className="text-sm text-slate-600 mb-2">Conectada</p>
+                  <p className="text-xs text-slate-500 font-mono break-all">{account}</p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-slate-600 mb-3">Desconectada</p>
+                  <button onClick={connectWallet} disabled={isConnecting} className="w-full px-3 py-2 text-sm bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50">
+                    {isConnecting ? 'Conectando...' : 'Conectar'}
+                  </button>
+                </div>
+              )}
             </div>
-            
-            {account ? (
-              <div>
-                <p className="text-sm text-slate-600 mb-2">Conectada</p>
-                <p className="text-xs text-slate-500 font-mono break-all">
-                  {account}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <p className="text-sm text-slate-600 mb-3">Desconectada</p>
-                <button
-                  onClick={connectWallet}
-                  disabled={isConnecting}
-                  className="w-full px-3 py-2 text-sm bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
-                >
-                  {isConnecting ? 'Conectando...' : 'Conectar'}
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -318,42 +268,21 @@ const navItems = [
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                      activeTab === item.id
-                        ? 'border-blue-900 text-blue-900'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 mr-2" />
-                    {item.label}
+                  <button key={item.id} onClick={() => setActiveTab(item.id)} className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === item.id ? 'border-blue-900 text-blue-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}>
+                    <Icon className="w-5 h-5 mr-2" /> {item.label}
                   </button>
                 );
               })}
             </nav>
           </div>
-          
           <div className="p-6">
             {renderTabContent()}
           </div>
         </div>
       </div>
 
-      {showPaymentModal && (
-        <PaymentModal 
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-        />
-      )}
-      
-      {showScannerModal && (
-        <QRScannerModal
-          isOpen={showScannerModal}
-          onClose={() => setShowScannerModal(false)}
-        />
-      )}
+      {showPaymentModal && <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />}
+      {showScannerModal && <QRScannerModal isOpen={showScannerModal} onClose={() => setShowScannerModal(false)} />}
     </div>
   );
 };

@@ -442,19 +442,15 @@ export const Web3Provider = ({ children }) => {
     if (!tokenConfig) return null;
 
     try {
-      // ---> AQUI ESTÁ A MUDANÇA PRINCIPAL <---
-      const taxa = 0.02; // 2%
-      const finalAmountBRL = amountBRL * (1 + taxa); // Adiciona a taxa ao valor
-
       const usdRate = await fetchExchangeRate();
+      // ATUALIZADO: Usa a nova função de busca de preço
       const tokenRate = await fetchPriceFromGeckoTerminal(tokenSymbol);
 
       if (!usdRate || !tokenRate || tokenRate === 0) {
         throw new Error('Não foi possível obter as taxas de câmbio necessárias.');
       }
-      
-      // A partir daqui, usamos o novo valor "finalAmountBRL" para os cálculos
-      const amountUSD = finalAmountBRL / usdRate;
+
+      const amountUSD = amountBRL / usdRate;
       const amountToken = amountUSD / tokenRate;
       const amountInWei = ethers.parseUnits(amountToken.toString(), tokenConfig.decimals);
 
@@ -464,14 +460,13 @@ export const Web3Provider = ({ children }) => {
         uri,
         amountToken,
         amountUSD,
-        amountBRL // Retorna o valor original para exibição na tela do comerciante
+        amountBRL
       };
     } catch (error) {
       console.error('Erro ao gerar QR de pagamento:', error);
       return null;
     }
   };
-
 
   const fetchExchangeRate = async () => {
     try {
