@@ -23,6 +23,8 @@ import TransactionHistory from '../components/TransactionHistory';
 import StoreMap from '../components/StoreMap';
 import PaymentModal from '../components/PaymentModal';
 import QRScannerModal from '../components/QRScannerModal';
+import Logo from '../components/Logo'; // Ajuste o caminho se necessário
+
 
 const ClientDashboard = () => {
   const { user, logout, token } = useAuth();
@@ -145,10 +147,8 @@ const ClientDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-gray-900 to-gray-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
-              </div>
-              <h1 className="ml-3 text-xl font-bold text-gray-900">PayCoin</h1>
+              <Logo variant="escuro" />
+
             </div>
             
             <div className="flex items-center space-x-4">
@@ -162,7 +162,7 @@ const ClientDashboard = () => {
                     {user?.profile?.profile_picture ? (
                       <img src={user.profile.profile_picture} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-900 to-blue-700">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-slate-900 to-slate-700">
                         <span className="text-white text-sm font-bold">{user?.name?.charAt(0)?.toUpperCase()}</span>
                       </div>
                     )}
@@ -220,7 +220,7 @@ const ClientDashboard = () => {
                   </button>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-blue-800 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-orange-500 rounded-full flex items-center justify-center">
                 <Wallet className="w-6 h-6" />
               </div>
             </div>
@@ -233,10 +233,10 @@ const ClientDashboard = () => {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <h4 className="font-semibold text-slate-900">Ações Rápidas</h4>
             <div className="space-y-3 mt-4">
-              <button onClick={() => setShowPaymentModal(true)} className="w-full flex items-center justify-center px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors">
+              <button onClick={() => setShowPaymentModal(true)} className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:bg-gradient-to-r from-orange-600 to-orange-500 transition-colors">
                 <Send className="w-4 h-4 mr-2" /> Enviar
               </button>
-              <button onClick={() => setShowScannerModal(true)} className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-500 transition-colors">
+              <button onClick={() => setShowScannerModal(true)} className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r from-stale-900 to-slate-700 text-white rounded-lg hover:bg-gradient-to-r from-slate-900 to-slate-700 transition-colors">
                 <Scan className="w-4 h-4 mr-2" /> Pagar
               </button>
             </div>
@@ -253,7 +253,7 @@ const ClientDashboard = () => {
               ) : (
                 <div>
                   <p className="text-sm text-slate-600 mb-3">Desconectada</p>
-                  <button onClick={connectWallet} disabled={isConnecting} className="w-full px-3 py-2 text-sm bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50">
+                  <button onClick={connectWallet} disabled={isConnecting} className="w-full px-3 py-2 text-sm bg-gradient-to-r from-slate-900 to-slate-700 text-white rounded-lg hover:bg-gradient-to-r from-orange-600 to-orange-500 transition-colors disabled:opacity-50">
                     {isConnecting ? 'Conectando...' : 'Conectar'}
                   </button>
                 </div>

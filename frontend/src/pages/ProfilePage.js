@@ -17,6 +17,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Logo from '../components/Logo'; // Ajuste o caminho se necessário
 
 const ProfilePage = () => {
   const { user, updateProfile } = useAuth();
@@ -96,10 +97,7 @@ const ProfilePage = () => {
               </Link>
             </div>
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-900 to-blue-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
-              </div>
-              <span className="ml-2 text-xl font-bold text-blue-900">PayCoin</span>
+               <Logo size="md" variant="escuro" />
             </div>
           </div>
         </div>

@@ -25,12 +25,17 @@ import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import ReceivePaymentModal from '../components/ReceivePaymentModal';
 import ReceivePaymentSection from '../components/ReceivePaymentSection';
-import ProductManagement from '../components/ProductManagement';
+
 import StoreManagement from '../components/StoreManagement';
 import QuickReceiveForm from '../components/QuickReceiveForm';
+import Logo from '../components/Logo'; // Ajuste o caminho se necessário
+
 
 const MerchantDashboard = () => {
-  const { user, logout, token } = useAuth();
+  const { user, logout } = useAuth();
+  // =====================================================================
+  // CORREÇÃO: Puxando as funções necessárias para o cálculo de preço
+  // =====================================================================
   const { 
     account, 
     balances, 
@@ -44,55 +49,36 @@ const MerchantDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showBalance, setShowBalance] = useState(true);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
-  
-  // Estados para dados reais da API
-  const [analytics, setAnalytics] = useState(null);
-  const [recentTransactions, setRecentTransactions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
+  const [analytics, setAnalytics] = useState({
+    total_revenue: 0,
+    transaction_count: 0,
+    avg_transaction: 0
+  });
+
+  // =====================================================================
+  // CORREÇÃO: Novo estado para armazenar o saldo total em BRL
+  // =====================================================================
   const [totalBalanceBRL, setTotalBalanceBRL] = useState(0);
   const [isCalculatingBalance, setIsCalculatingBalance] = useState(true);
 
   const navItems = [
     { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
-    { id: 'receive', label: 'Receber', icon: QrCode },
-    { id: 'products', label: 'Produtos', icon: Package },
-    { id: 'store', label: 'Loja', icon: Store },
+    { id: 'receive', label: 'Receber Pagamento', icon: QrCode },
+  
+    { id: 'store', label: 'Minhas Lojas', icon: Store },
   ];
 
-  // Efeito para buscar dados da visão geral
+  const salesData = [ { name: 'Jan', vendas: 4000 }, { name: 'Fev', vendas: 3000 }, { name: 'Mar', vendas: 2000 }, { name: 'Abr', vendas: 2780 }, { name: 'Mai', vendas: 1890 }, { name: 'Jun', vendas: 2390 }, ];
+  const tokenDistribution = [ { name: 'PSPAY', value: 65, color: '#1e3a8a' }, { name: 'USDT', value: 35, color: '#f97316' }, ];
+  const recentTransactions = [ { id: '1', amount: 150.00, token: 'PSPAY', customer: 'João Silva', time: '2 min atrás', status: 'completed' }, { id: '2', amount: 89.50, token: 'USDT', customer: 'Maria Santos', time: '15 min atrás', status: 'completed' }, { id: '3', amount: 220.00, token: 'PSPAY', customer: 'Pedro Oliveira', time: '1 hora atrás', status: 'pending' }, ];
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (!token || activeTab !== 'overview') return;
+    fetchAnalytics();
+  }, []);
 
-      setIsLoading(true);
-      try {
-        const headers = { 'Authorization': `Bearer ${token}` };
-
-        // Busca as análises
-        const analyticsRes = await fetch('/api/analytics/dashboard', { headers });
-        if (!analyticsRes.ok) throw new Error('Falha ao buscar análises');
-        const analyticsData = await analyticsRes.json();
-        setAnalytics(analyticsData);
-
-        // Busca as transações
-        const transactionsRes = await fetch('/api/transactions', { headers });
-        if (!transactionsRes.ok) throw new Error('Falha ao buscar transações');
-        const transactionsData = await transactionsRes.json();
-        setRecentTransactions(transactionsData.slice(0, 5));
-
-      } catch (error) {
-        console.error("Erro ao carregar dados do dashboard:", error);
-        toast.error("Não foi possível carregar os dados da visão geral.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, [token, activeTab]);
-
-  // Efeito para calcular o saldo
+  // =====================================================================
+  // CORREÇÃO: useEffect para calcular o saldo total sempre que os saldos mudarem
+  // =====================================================================
   useEffect(() => {
     const calculateTotalBalance = async () => {
       if (!balances || Object.keys(balances).length === 0) {
@@ -100,19 +86,26 @@ const MerchantDashboard = () => {
         setIsCalculatingBalance(false);
         return;
       }
+      
       setIsCalculatingBalance(true);
       try {
         const brlRate = await fetchExchangeRate();
+        let totalValue = 0;
+
         const pricePromises = Object.entries(balances).map(async ([tokenKey, balanceData]) => {
           if (balanceData && balanceData.formatted) {
             const tokenPriceUSD = await getTokenPrice(tokenKey);
             const tokenAmount = parseFloat(balanceData.formatted);
-            return (tokenAmount * tokenPriceUSD) * brlRate;
+            const valueInUSD = tokenAmount * tokenPriceUSD;
+            return valueInUSD * brlRate;
           }
           return 0;
         });
+        
         const results = await Promise.all(pricePromises);
-        setTotalBalanceBRL(results.reduce((a, b) => a + b, 0));
+        totalValue = results.reduce((acc, value) => acc + value, 0);
+        
+        setTotalBalanceBRL(totalValue);
       } catch (error) {
         console.error("Erro ao calcular saldo total:", error);
         setTotalBalanceBRL(0);
@@ -120,165 +113,319 @@ const MerchantDashboard = () => {
         setIsCalculatingBalance(false);
       }
     };
+    
     calculateTotalBalance();
   }, [balances, getTokenPrice, fetchExchangeRate]);
 
+
+  const fetchAnalytics = async () => {
+    setAnalytics({ total_revenue: 15350.75, transaction_count: 142, avg_transaction: 108.17 });
+  };
+
   const handleLogout = () => {
-    if(account) disconnectWallet();
+    if(account) {
+      disconnectWallet();
+    }
     logout();
     toast.success("Você saiu da sua conta.");
   };
-  
-  const renderOverview = () => {
-    if (isLoading) {
-      return <div className="text-center p-8 text-slate-500">Carregando dados...</div>;
-    }
-    return (
-      <div className="space-y-8 animate-fade-in">
-        {/* Cards de Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border flex items-center space-x-4">
-            <div className="p-3 bg-blue-100 rounded-full"><DollarSign className="text-blue-600"/></div>
+
+  // A função antiga getTotalBalance foi removida.
+
+  const renderOverview = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">Receita Total</p>
-              <p className="text-2xl font-bold">R$ {(analytics?.total_revenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-2xl font-bold text-slate-900">R$ {analytics.total_revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"><DollarSign className="w-6 h-6 text-green-600" /></div>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border flex items-center space-x-4">
-            <div className="p-3 bg-green-100 rounded-full"><Receipt className="text-green-600"/></div>
+          <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+12.5%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">Transações</p>
-              <p className="text-2xl font-bold">{analytics?.transaction_count || 0}</p>
+              <p className="text-2xl font-bold text-slate-900">{analytics.transaction_count}</p>
             </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><Receipt className="w-6 h-6 text-blue-600" /></div>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border flex items-center space-x-4">
-            <div className="p-3 bg-orange-100 rounded-full"><ShoppingBag className="text-orange-600"/></div>
+           <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+8.2%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-600">Ticket Médio</p>
-              <p className="text-2xl font-bold">R$ {(analytics?.avg_transaction || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-2xl font-bold text-slate-900">R$ {analytics.avg_transaction.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
+            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"><ShoppingBag className="w-6 h-6 text-orange-600" /></div>
           </div>
+           <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+3.1%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
         </div>
-
-        {/* Transações Recentes */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-6 border-b"><h3 className="text-lg font-semibold">Transações Recentes</h3></div>
-          <div className="p-2 md:p-6">
-            {recentTransactions.length > 0 ? (
-              <div className="divide-y divide-slate-100">
-                {recentTransactions.map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                       <div className="p-2 bg-green-100 rounded-full"><ArrowDownLeft size={20} className="text-green-600"/></div>
-                       <div>
-                         <p className="font-semibold text-slate-700">Recebimento</p>
-                         <p className="text-xs text-slate-500">De: {tx.from_user_id.slice(0,6)}...{tx.from_user_id.slice(-4)}</p>
-                       </div>
-                    </div>
-                    <div className="text-right">
-                       <p className="font-bold text-green-600">+ {(tx.amount).toLocaleString('pt-BR')} {tx.token_type}</p>
-                       <p className="text-xs text-slate-500">{new Date(tx.created_at).toLocaleDateString('pt-BR')}</p>
-                    </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-600">Clientes Únicos</p>
+              <p className="text-2xl font-bold text-slate-900">89</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"><Users className="w-6 h-6 text-purple-600" /></div>
+          </div>
+           <div className="flex items-center mt-4 text-sm"><TrendingUp className="w-4 h-4 text-green-500 mr-1" /><span className="text-green-500">+15.7%</span><span className="text-slate-500 ml-1">vs mês anterior</span></div>
+        </div>
+      </div>
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Vendas Mensais</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={salesData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis /><Tooltip /><Bar dataKey="vendas" fill="#1e3a8a" /></BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Distribuição por Token</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie data={tokenDistribution} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}%`}>
+                {tokenDistribution.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
+              </Pie><Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div className="p-6 border-b border-slate-200"><h3 className="text-lg font-semibold text-slate-900">Transações Recentes</h3></div>
+        <div className="p-6">
+          <div className="space-y-4">
+            {recentTransactions.map((transaction) => (
+              <div key={transaction.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-900 to-blue-700 rounded-full flex items-center justify-center mr-4"><ArrowDownLeft className="w-5 h-5 text-white" /></div>
+                  <div>
+                    <p className="font-medium text-slate-900">{transaction.customer}</p>
+                    <p className="text-sm text-slate-600">{transaction.time}</p>
                   </div>
-                ))}
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-slate-900">R$ {transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <div className="flex items-center"><span className={`inline-block w-2 h-2 rounded-full mr-2 ${transaction.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`}></span><span className="text-sm text-slate-600">{transaction.token}</span></div>
+                </div>
               </div>
-            ) : <p className="p-4 text-slate-500">Nenhuma transação recente encontrada.</p>}
+            ))}
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview': return renderOverview();
       case 'receive': return <ReceivePaymentSection />;
-      case 'products': return <ProductManagement />;
+  
       case 'store': return <StoreManagement />;
       default: return renderOverview();
     }
   };
 
-  // ▼▼▼ CORREÇÃO PRINCIPAL: O JSX do layout foi adicionado aqui ▼▼▼
   return (
-    <div className="min-h-screen flex bg-slate-100 font-sans">
-      {/* Sidebar de Navegação */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
-        <div className="p-6 border-b border-slate-200">
-          <h2 className="text-2xl font-bold text-slate-800">Painel</h2>
-        </div>
-        <nav className="flex-1 p-4 space-y-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                activeTab === item.id 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <item.icon size={20} />
-              <span className="font-medium">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="p-4 border-t border-slate-200">
-           <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
-           >
-             <LogOut size={20} />
-             <span className="font-medium">Sair da Conta</span>
-           </button>
-        </div>
-      </aside>
+    <div className="min-h-screen bg-slate-50">
+      <header className="bg-slate-100 shadow-sm border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <Logo variant="escuro" />
 
-      {/* Conteúdo Principal */}
-      <div className="flex-1 flex flex-col">
-        {/* Header do Conteúdo */}
-        <header className="bg-white border-b border-slate-200 p-4 sm:p-6 flex justify-between items-center">
-          <div>
-             <h3 className="text-xl font-bold text-slate-800">
-                {navItems.find(item => item.id === activeTab)?.label}
-             </h3>
-             <p className="text-sm text-slate-500">Bem-vindo(a) de volta!</p>
-          </div>
-          <div className="flex items-center space-x-4">
-              {account ? (
-                <div className="bg-white border rounded-lg p-3 text-center">
-                    <p className="text-xs text-slate-500">Saldo Total Estimado</p>
-                    <div className="flex items-center justify-center space-x-2">
-                      <p className={`text-lg font-bold ${isCalculatingBalance ? 'animate-pulse' : ''}`}>
-                         {showBalance ? `R$ ${totalBalanceBRL.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'R$ ••••••'}
-                      </p>
-                      <button onClick={() => setShowBalance(!showBalance)} className="text-slate-500 hover:text-slate-800">
-                          {showBalance ? <EyeOff size={18}/> : <Eye size={18}/>}
-                      </button>
-                    </div>
+              <h1 className="ml-3 text-xl font-bold text-gray-900">Business</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <button onClick={() => setShowReceiveModal(true)} className="hidden sm:flex items-center px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:from-orange-500 hover:to-orange-400 transition-all">
+                <QrCode className="w-4 h-4 mr-2" />
+                Receber
+              </button>
+              
+              <button className="p-2 text-slate-600 hover:text-slate-900 transition-colors">
+                <Bell className="w-5 h-5" />
+              </button>
+              
+              <div className="relative group">
+                <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200">
+                    {user?.profile?.profile_picture ? (
+                      <img src={user.profile.profile_picture} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-orange-600 to-orange-500">
+                        <span className="text-white text-sm font-bold">{user?.name?.charAt(0)?.toUpperCase()}</span>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-slate-900 hidden sm:block">{user?.profile?.business_name || user?.name}</span>
+                </button>
+                
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                  <Link to="/profile" className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    <User className="w-4 h-4 mr-3" /> Meu Perfil
+                  </Link>
+                  <Link to="/settings" className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    <Settings className="w-4 h-4 mr-3" /> Configurações
+                  </Link>
+                   {account && (
+                    <button 
+                      onClick={() => {
+                        disconnectWallet();
+                        toast.info('Carteira desconectada.');
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    >
+                      <Power className="w-4 h-4 mr-3" />
+                      Desconectar Carteira
+                    </button>
+                  )}
+                  <hr className="my-1" />
+                  <button onClick={handleLogout} className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                    <LogOut className="w-4 h-4 mr-3" />
+                    Sair
+                  </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900">
+            {user?.profile?.business_name ? 
+              `Dashboard - ${user.profile.business_name}` : 
+              `Olá, ${user?.name?.split(' ')[0]}!`
+            } 📊
+          </h2>
+          <p className="text-slate-600 mt-1">
+            Acompanhe suas vendas e gerencie seu negócio
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="md:col-span-2 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-orange-100 text-sm">Saldo na Carteira</p>
+                <div className="flex items-center mt-1">
+                  {isCalculatingBalance ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : showBalance ? (
+                    <h3 className="text-2xl font-bold">
+                      {/* ===================================================================== */}
+                      {/* CORREÇÃO: Usando o estado com o valor real em BRL */}
+                      {/* ===================================================================== */}
+                      R$ {totalBalanceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </h3>
+                  ) : (
+                    <h3 className="text-2xl font-bold">R$ ••••••</h3>
+                  )}
+                  <button
+                    onClick={() => setShowBalance(!showBalance)}
+                    className="ml-2 p-1 rounded-full hover:bg-orange-700 transition-colors"
+                  >
+                    {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-orange-700 rounded-full flex items-center justify-center">
+                <Store className="w-6 h-6" />
+              </div>
+            </div>
+            
+            <div className="flex items-center text-orange-100 text-sm">
+              {account ? (
+                <>
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                  <span>Carteira conectada</span>
+                </>
               ) : (
-                <button 
-                  onClick={connectWallet} 
+                <>
+                  <div className="w-2 h-2 bg-red-400 rounded-full mr-2"></div>
+                  <span>Carteira desconectada</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-semibold text-slate-900">Status da Carteira</h4>
+              <div className={`w-3 h-3 rounded-full ${account ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            </div>
+            
+            {account ? (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Conectada</p>
+                  <p className="text-xs text-slate-500 font-mono break-all">
+                    {account}
+                  </p>
+                </div>
+                
+                <div className="border-t border-slate-200 pt-4">
+                  <h5 className="text-sm font-medium text-slate-900 mb-3">Receber Pagamento</h5>
+                  <QuickReceiveForm />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-slate-600 mb-3">Conecte sua carteira para receber pagamentos</p>
+                <button
+                  onClick={connectWallet}
                   disabled={isConnecting}
-                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 transition-colors disabled:bg-slate-400"
+                  className="w-full px-3 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-500 transition-colors disabled:opacity-50"
                 >
                   {isConnecting ? 'Conectando...' : 'Conectar Carteira'}
                 </button>
-              )}
+              </div>
+            )}
           </div>
-        </header>
-        
-        {/* Área de Conteúdo da Aba */}
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
-          {renderTabContent()}
-        </main>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
+          <div className="border-b border-slate-200">
+            <nav className="flex space-x-8 px-6">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                      activeTab === item.id
+                        ? 'border-orange-600 text-orange-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 mr-2" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+          
+          <div className="p-6">
+            {renderTabContent()}
+          </div>
+        </div>
       </div>
+
+      {showReceiveModal && (
+        <ReceivePaymentModal 
+          isOpen={showReceiveModal}
+          onClose={() => setShowReceiveModal(false)}
+        />
+      )}
     </div>
   );
-  // ▲▲▲ FIM DA CORREÇÃO ▲▲▲
 };
 
 export default MerchantDashboard;
-
-// CORREÇÃO: Chave "}" extra removida do final do arquivo

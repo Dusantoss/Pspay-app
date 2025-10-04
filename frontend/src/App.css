@@ -2,16 +2,16 @@
 @import 'leaflet/dist/leaflet.css';
 
 :root {
-  --color-primary: #111827; /* Gray 900 - Nova cor solicitada */
+  --color-primary: #0c2538; /* Gray 900 - Nova cor solicitada */
   --color-secondary: #f97316; /* Orange 600 */
   --color-accent: #fb923c; /* Orange 400 */
   --color-background: #ffffff;
   --color-surface: #f8fafc; /* Slate 50 */
   --color-header: #f1f5f9; /* Slate 100 - Cor gelo para cabeçalho */
-  --color-text: #1e293b; /* Slate 800 */
+  --color-text: #0c2538; /* Slate 800 */
   --color-text-muted: #64748b; /* Slate 500 */
   --color-border: #e2e8f0; /* Slate 200 */
-  --color-success: #10b981; /* Emerald 500 */
+  --color-success: #0c2538; /* Emerald 500 */
   --color-error: #ef4444; /* Red 500 */
   --color-warning: #f59e0b; /* Amber 500 */
 }

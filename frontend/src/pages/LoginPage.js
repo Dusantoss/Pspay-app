@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import Logo from '../components/Logo'; // Ajuste o caminho se necessário
+
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -54,17 +56,15 @@ const LoginPage = () => {
         {/* Header */}
         <div className="text-center">
           <Link to="/welcome" className="inline-flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">P</span>
-            </div>
-            <h1 className="ml-3 text-3xl font-bold text-blue-900">PayCoin</h1>
+            <Logo variant="escuro" />
+
           </Link>
           <h2 className="mt-6 text-2xl font-bold text-slate-900">
             Faça login na sua conta
           </h2>
           <p className="mt-2 text-sm text-slate-600">
             Ou{' '}
-            <Link to="/welcome" className="font-medium text-blue-900 hover:text-blue-800">
+            <Link to="/welcome" className="font-medium text-orange-600 hover:text-gray-800">
               escolha seu tipo de conta
             </Link>
           </p>
@@ -96,7 +96,7 @@ const LoginPage = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="Seu email"
                   value={formData.email}
                   onChange={handleChange}
@@ -118,7 +118,7 @@ const LoginPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  className="block w-full pl-10 pr-10 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-10 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="Sua senha"
                   value={formData.password}
                   onChange={handleChange}
@@ -143,7 +143,7 @@ const LoginPage = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-slate-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-900">
                   Lembrar de mim
@@ -151,7 +151,7 @@ const LoginPage = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-900 hover:text-blue-800">
+                <a href="#" className="font-medium text-orange-600 hover:text-gray-800">
                   Esqueceu a senha?
                 </a>
               </div>
@@ -161,7 +161,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-900 to-blue-700 hover:from-blue-800 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-orange-600 to-orange-500 hover:from-slate-900 hover:to-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -185,7 +185,7 @@ const LoginPage = () => {
             <div className="mt-6">
               <Link
                 to="/welcome"
-                className="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg text-sm font-medium text-orange-600 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
               >
                 Criar uma conta
               </Link>
@@ -197,11 +197,11 @@ const LoginPage = () => {
         <div className="text-center text-sm text-slate-600">
           <p>
             Ao continuar, você concorda com nossos{' '}
-            <a href="#" className="text-blue-900 hover:text-blue-800">
+            <a href="#" className="text-orange-600 hover:text-gray-800">
               Termos de Serviço
             </a>{' '}
             e{' '}
-            <a href="#" className="text-blue-900 hover:text-blue-800">
+            <a href="#" className="text-orange-600 hover:text-gray-800">
               Política de Privacidade
             </a>
           </p>

@@ -136,7 +136,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
               </p>
               <button
                 onClick={onClose}
-                className="bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
+                className="bg-gradient-to-r from-slate-900 to-slate-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
               >
                 Fechar
               </button>
@@ -152,7 +152,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
                   name="token"
                   value={formData.token}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                 >
                   {Object.entries(tokens).map(([key, token]) => (
                     <option key={key} value={key}>
@@ -173,7 +173,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
                   value={formData.toAddress}
                   onChange={handleChange}
                   placeholder="0x..."
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 ${
                     errors.toAddress ? 'border-red-300' : 'border-slate-300'
                   }`}
                 />
@@ -196,7 +196,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
                     placeholder="0.00"
                     step="0.0001"
                     min="0"
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 ${
                       errors.amount ? 'border-red-300' : 'border-slate-300'
                     }`}
                   />
@@ -223,7 +223,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Ex: Pagamento de produto"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                 />
               </div>
 
@@ -253,7 +253,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:bg-gradient-to-r from-slate-900 to-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center">

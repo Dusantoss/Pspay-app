@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CreditCard, Store, Users, Shield, Zap, Globe } from 'lucide-react';
-import Logo from '../components/Logo'; // Ajuste o caminho se necessário
-
 
 const WelcomePage = () => {
   return (
@@ -11,13 +9,12 @@ const WelcomePage = () => {
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            
-<div className="flex items-center">
-  <Logo variant="escuro" />
-  
-</div>
-
-            
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-900 to-blue-700 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xl">P</span>
+              </div>
+              <h1 className="ml-3 text-2xl font-bold text-blue-900">Pspay App</h1>
+            </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#features" className="text-slate-600 hover:text-blue-900 transition-colors">Recursos</a>
               <a href="#about" className="text-slate-600 hover:text-blue-900 transition-colors">Sobre</a>
@@ -49,9 +46,9 @@ const WelcomePage = () => {
             to="/register/client"
             className="group relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-100 to-orange-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 to-blue-700/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-r from-slate-900 to-gray-700 rounded-xl flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl flex items-center justify-center mb-6">
                 <CreditCard className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Sou Cliente</h3>
@@ -61,23 +58,23 @@ const WelcomePage = () => {
               </p>
               <ul className="space-y-2 text-sm text-slate-600">
                 <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gradient-to-r from-gray-900 to-gray-700 rounded-full mr-3"></div>
+                  <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                   Carteira digital segura
                 </li>
                 <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gradient-to-r from-gray-900 to-gray-700 rounded-full mr-3"></div>
+                  <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                   Pagamentos via QR Code
                 </li>
                 <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gradient-to-r from-gray-900 to-gray-700 rounded-full mr-3"></div>
+                  <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                   Mapa de lojas parceiras
                 </li>
                 <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gradient-to-r from-gray-900 to-gray-700 rounded-full mr-3"></div>
+                  <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                   Histórico de transações
                 </li>
               </ul>
-              <button className="mt-6 w-full bg-gradient-to-r from-slate-900 to-gray-700 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all">
+              <button className="mt-6 w-full bg-gradient-to-r from-blue-900 to-blue-700 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-800 hover:to-blue-600 transition-all">
                 Começar como Cliente
               </button>
             </div>
@@ -88,7 +85,7 @@ const WelcomePage = () => {
             to="/register/merchant"
             className="group relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-slate-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-600/5 to-orange-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative">
               <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl flex items-center justify-center mb-6">
                 <Store className="w-8 h-8 text-white" />
@@ -116,7 +113,7 @@ const WelcomePage = () => {
                   Perfil da loja no mapa
                 </li>
               </ul>
-              <button className="mt-6 w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-slate-900 hover:to-slate-700 transition-all">
+              <button className="mt-6 w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-500 hover:to-orange-400 transition-all">
                 Começar como Comerciante
               </button>
             </div>
@@ -126,11 +123,11 @@ const WelcomePage = () => {
         {/* Features Section */}
         <section id="features" className="mb-16">
           <h3 className="text-3xl font-bold text-center text-slate-900 mb-12">
-            Por que escolher o Pspay App?
+            Por que escolher o PayCoin?
           </h3>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <h4 className="text-xl font-semibold text-slate-900 mb-2">Segurança Total</h4>
@@ -139,7 +136,7 @@ const WelcomePage = () => {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-8 h-8 text-white" />
               </div>
               <h4 className="text-xl font-semibold text-slate-900 mb-2">Rapidez</h4>
@@ -148,7 +145,7 @@ const WelcomePage = () => {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Globe className="w-8 h-8 text-white" />
               </div>
               <h4 className="text-xl font-semibold text-slate-900 mb-2">Global</h4>
@@ -160,14 +157,14 @@ const WelcomePage = () => {
         </section>
 
         {/* CTA Section */}
-         <section className="text-center bg-gradient-to-r from-slate-900 to-gray-700 rounded-2xl p-12 text-white mb-16">
+        <section className="text-center bg-gradient-to-r from-blue-900 to-blue-700 rounded-2xl p-12 text-white mb-16">
           <h3 className="text-3xl font-bold mb-4">Já tem uma conta?</h3>
           <p className="text-blue-100 mb-8 text-lg">
-            Faça login e continue aproveitando os benefícios do Pspay App
+            Faça login e continue aproveitando os benefícios do PayCoin
           </p>
           <Link 
             to="/login"
-            className="inline-block bg-white text-orange-600 px-8 py-3 rounded-lg font-semibold hover:bg-orange-50 transition-colors"
+            className="inline-block bg-white text-blue-900 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
           >
             Fazer Login
           </Link>
@@ -175,17 +172,16 @@ const WelcomePage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-slate-900 to-gray-700 text-white">
+      <footer className="bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              
-           <div className="flex items-center">
-  <Logo variant="claro" />
-
-  
-</div>
-<br></br>
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold">P</span>
+                </div>
+                <h4 className="ml-2 text-xl font-bold">Pspay App</h4>
+              </div>
               <p className="text-slate-400">
                 A plataforma de pagamentos em criptomoedas mais confiável do Brasil.
               </p>

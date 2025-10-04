@@ -4,6 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock, User, Phone, AlertCircle, CreditCard, Store } from 'lucide-react';
 import { toast } from 'sonner';
 
+import Logo from '../components/Logo'; // Ajuste o caminho se necessário
+
+
 const RegisterPage = () => {
   const { type } = useParams(); // 'client' or 'merchant'
   const navigate = useNavigate();
@@ -143,21 +146,19 @@ const RegisterPage = () => {
   const IconComponent = config.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen  bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <Link to="/welcome" className="inline-flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">P</span>
-            </div>
-            <h1 className="ml-3 text-3xl font-bold text-blue-900">PayCoin</h1>
+            <Logo variant="escuro" />
+
           </Link>
           
           <div className="mt-6 flex items-center justify-center">
             <div className={`w-16 h-16 bg-gradient-to-r ${
               config.color === 'blue' 
-                ? 'from-blue-900 to-blue-700' 
+                ? 'from-gray-900 to-gray-700' 
                 : 'from-orange-600 to-orange-500'
             } rounded-xl flex items-center justify-center`}>
               <IconComponent className="w-8 h-8 text-white" />
@@ -196,7 +197,7 @@ const RegisterPage = () => {
                   type="text"
                   autoComplete="name"
                   required
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-700 ${
                     errors.name ? 'border-red-300' : 'border-slate-300'
                   }`}
                   placeholder="Nome completo"
@@ -221,7 +222,7 @@ const RegisterPage = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-700 ${
                     errors.email ? 'border-red-300' : 'border-slate-300'
                   }`}
                   placeholder="Email"
@@ -245,7 +246,7 @@ const RegisterPage = () => {
                   name="phone"
                   type="tel"
                   autoComplete="tel"
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-700 ${
                     errors.phone ? 'border-red-300' : 'border-slate-300'
                   }`}
                   placeholder="Telefone (opcional)"
@@ -270,7 +271,7 @@ const RegisterPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-700 ${
                     errors.password ? 'border-red-300' : 'border-slate-300'
                   }`}
                   placeholder="Senha"
@@ -306,7 +307,7 @@ const RegisterPage = () => {
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-700 ${
                     errors.confirmPassword ? 'border-red-300' : 'border-slate-300'
                   }`}
                   placeholder="Confirmar senha"
@@ -336,8 +337,8 @@ const RegisterPage = () => {
                 disabled={isLoading}
                 className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
                   config.color === 'blue'
-                    ? 'bg-gradient-to-r from-blue-900 to-blue-700 hover:from-blue-800 hover:to-blue-600 focus:ring-blue-500'
-                    : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 focus:ring-orange-500'
+                    ? 'bg-gradient-to-r from-gray-900 to-gray-700 hover:from-orange-600 hover:to-orange-500 focus:ring-gray-700'
+                    : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-gray-900 hover:to-gray-700 focus:ring-orange-500'
                 }`}
               >
                 {isLoading ? (
@@ -362,7 +363,7 @@ const RegisterPage = () => {
             <div className="mt-6">
               <Link
                 to="/login"
-                className="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
               >
                 Fazer Login
               </Link>
@@ -377,7 +378,7 @@ const RegisterPage = () => {
             <Link 
               to={`/register/${type === 'client' ? 'merchant' : 'client'}`}
               className={`font-medium hover:underline ${
-                config.color === 'blue' ? 'text-orange-600' : 'text-blue-900'
+                config.color === 'blue' ? 'text-gray-900' : 'text-orange-600'
               }`}
             >
               Clique aqui
@@ -389,11 +390,11 @@ const RegisterPage = () => {
         <div className="text-center text-sm text-slate-600">
           <p>
             Ao criar uma conta, você concorda com nossos{' '}
-            <a href="#" className="text-blue-900 hover:text-blue-800">
+            <a href="#" className="text-gray-900 hover:text-orange-600">
               Termos de Serviço
             </a>{' '}
             e{' '}
-            <a href="#" className="text-blue-900 hover:text-blue-800">
+            <a href="#" className="text-gray-900 hover:text-orange-600">
               Política de Privacidade
             </a>
           </p>
